@@ -1,0 +1,362 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://xmlns.jcp.org/jsf/html"
+	xmlns:f="http://xmlns.jcp.org/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+	template="/templates/modelo.xhtml">
+	
+<ui:define name="conteudo">
+	<h:form id="formListagem">
+		<p:panel header="Listagem de Avaliações Físicas">
+
+			<p:dataTable id="tabela" emptyMessage="Nenhum registro encontrado."
+				paginator="true" value="#{avaliacaoFisicaBean.avaliacoesFisicas}" var="avaliacaoFisica" rows="10" 
+				rowStyleClass="#{(avaliacaoFisica.objetivo) eq 'Perda de Peso' ? 'condicao1' : 
+								(avaliacaoFisica.objetivo) eq 'Hipertrofia' ? 'condicao2' : 'condicao3'}"
+				scrollable="true" scrollWidth="97%" scrollHeight="230" paginatorPosition="top"
+				paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} 
+				{NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+					rowsPerPageTemplate="5,10,15"
+					currentPageReportTemplate="{currentPage} de {totalPages}">
+        		<f:facet name="header">
+					<p:commandButton id="toggler" type="button" value="Colunas" style="float:left" icon="ui-icon-calculator" />
+			        <p:columnToggler datasource="tabela" trigger="toggler" />
+					<p:commandButton value="Nova Avaliação" style="float:right" oncomplete="PF('dialogo').show();" 
+						actionListener="#{avaliacaoFisicaBean.novo}"
+						update=":mensagem :formCadastro:painel">
+						<f:actionListener type="org.omnifaces.eventlistener.ResetInputAjaxActionListener" />
+					</p:commandButton>
+				</f:facet>
+
+				<p:column headerText="Professor" footerText="Professor" sortBy="#{avaliacaoFisica.usuario.nome}" 
+					filterBy="#{avaliacaoFisica.usuario.nome}" filterMatchMode="contains"
+					style="width:150px;" filterStyle="width:75px;" filterMaxLength="60">
+					<h:outputText value="#{avaliacaoFisica.usuario.nome}" />
+				</p:column>
+				<p:column headerText="Aluno" footerText="Aluno" sortBy="#{avaliacaoFisica.aluno.nome}" 
+					filterBy="#{avaliacaoFisica.aluno.nome}" filterMatchMode="contains"
+					style="width:150px;" filterStyle="width:75px;" filterMaxLength="60">
+					<h:outputText value="#{avaliacaoFisica.aluno.nome}" />
+				</p:column>
+				<p:column headerText="Objetivo" footerText="Objetivo" 
+					filterBy="#{avaliacaoFisica.objetivo}" filterMatchMode="contains"
+					style="width:110px;" filterStyle="width:55px;" filterMaxLength="24">
+					<h:outputText value="#{avaliacaoFisica.objetivo}" />
+				</p:column>
+				<p:column headerText="Data da Avaliação" footerText="Data da Avaliação" sortBy="#{avaliacaoFisica.dtAvaFisica}"
+					style="width:105px;">
+					<h:outputText value="#{avaliacaoFisica.dtAvaFisica}">
+						<f:convertDateTime locale="pt_BR" />
+					</h:outputText>
+				</p:column>
+				<p:column headerText="Peso" footerText="Peso" sortBy="#{avaliacaoFisica.peso}" style="width:75px;">
+					<h:outputText value="#{avaliacaoFisica.peso}">
+						<f:convertNumber locale="pt_BR" minFractionDigits="1" />
+					</h:outputText>
+				</p:column>
+				<p:column headerText="Altura" footerText="Altura" sortBy="#{avaliacaoFisica.altura}" style="width:75px;">
+					<h:outputText value="#{avaliacaoFisica.altura}">
+						<f:convertNumber locale="pt_BR" minFractionDigits="2" />
+					</h:outputText>
+				</p:column>
+				<p:column headerText="Pescoço" footerText="Pescoço" sortBy="#{avaliacaoFisica.pescoco}" style="width:75px;">
+					<h:outputText value="#{avaliacaoFisica.pescoco}">
+						<f:convertNumber locale="pt_BR" minFractionDigits="2" />
+					</h:outputText>
+				</p:column>
+				<p:column headerText="Ombros" footerText="Ombros" sortBy="#{avaliacaoFisica.ombros}" style="width:75px;">
+					<h:outputText value="#{avaliacaoFisica.ombros}">
+						<f:convertNumber locale="pt_BR" minFractionDigits="2"/>
+					</h:outputText>
+				</p:column>
+				<p:column headerText="Opções" footerText="Opções" style="width:80px;">
+					<p:commandButton icon="ui-icon-trash" title="Excluir avaliação física"
+						actionListener="#{avaliacaoFisicaBean.excluir}"
+						update=":mensagem :formListagem:tabela">
+						<p:confirm header="Confirmação" message="Deseja excluir a avaliação física?" 
+							icon="ui-icon-alert"/>
+						<f:attribute name="avaliacaoFisicaSelecionada" value="#{avaliacaoFisica}" />
+					</p:commandButton>
+					<p:commandButton icon="ui-icon-pencil" title="Alterar avaliação física"
+						actionListener="#{avaliacaoFisicaBean.editar}" 
+						update=":mensagem :formCadastro:painel"
+						oncomplete="PF('dialogo').show();">
+						<f:attribute name="avaliacaoFisicaSelecionada" value="#{avaliacaoFisica}" />
+						<f:actionListener type="org.omnifaces.eventlistener.ResetInputAjaxActionListener" />
+					</p:commandButton>
+				</p:column>
+			</p:dataTable>
+			
+			<p:confirmDialog global="true">
+				<p:commandButton value="Sim" type="button" 
+					styleClass="ui-confirmdialog-yes" icon="ui-icon-check" />
+				<p:commandButton value="Não" type="button" 
+					styleClass="ui-confirmdialog-no" icon="ui-icon-close" />
+			</p:confirmDialog>
+		</p:panel>
+	</h:form>
+	
+	<p:dialog header="Cadastro de Avaliações Físicas" widgetVar="dialogo" 
+		draggable="false" resizable="false" modal="true" closable="false">
+		<h:form id="formCadastro">
+			<h:panelGroup id="painel" layout="block" style="height:550px;width:440px;overflow-y:scroll">
+			
+				<p:fieldset legend="Informações Básicas" toggleable="true" toggleSpeed="500">
+					<h:panelGrid columns="2">
+					<p:outputLabel for="professor" value="Professor:" />
+					<p:selectOneMenu id="professor" filter="true" filterMatchMode="contains"
+						value="#{avaliacaoFisicaBean.avaliacaoFisica.usuario}"
+						converter="omnifaces.SelectItemsConverter" required="true"
+						requiredMessage="O campo 'Professor' é obrigatório!!">
+						<f:selectItem noSelectionOption="true" itemLabel="Selecione um Professor" />
+						<f:selectItems value="#{avaliacaoFisicaBean.usuarios}" var="usuario"
+							itemValue="#{usuario}" itemLabel="#{usuario.nome}" />
+					</p:selectOneMenu>
+				
+					<p:outputLabel for="aluno" value="Aluno:" />
+					<p:selectOneMenu id="aluno" filter="true" filterMatchMode="contains"
+						value="#{avaliacaoFisicaBean.avaliacaoFisica.aluno}"
+						converter="omnifaces.SelectItemsConverter" required="true"
+						requiredMessage="O campo 'Aluno' é obrigatório!!">
+						<f:selectItem noSelectionOption="true" itemLabel="Selecione um Aluno" />
+						<f:selectItems value="#{avaliacaoFisicaBean.alunos}" var="aluno"
+							itemValue="#{aluno}" itemLabel="#{aluno.nome}" />
+					</p:selectOneMenu>
+				
+					<p:outputLabel for="obj" value="Objetivo:" />
+					<p:selectOneMenu id="obj"
+						value="#{avaliacaoFisicaBean.avaliacaoFisica.objetivo}" required="true"
+						requiredMessage="O campo 'Objetivo' é obrigatório!!">
+						<f:selectItem noSelectionOption="true" itemLabel="Selecione o Objetivo" />
+						<f:selectItem itemValue="Hipertrofia" itemLabel="Hipertrofia" />
+						<f:selectItem itemValue="Condicionamento Físico" itemLabel="Condicionamento Físico" />
+						<f:selectItem itemValue="Perda de Peso" itemLabel="Perda de Peso" />
+					</p:selectOneMenu>
+	
+					<p:outputLabel for="dtAvaFis" value="Data da Avaliação Física:" />
+					<p:calendar id="dtAvaFis" size="10"
+						value="#{avaliacaoFisicaBean.avaliacaoFisica.dtAvaFisica}" required="true"
+						requiredMessage="O campo 'Data da Avaliação Física' é obrigatório!!" 
+						locale="pt_BR" mindate="01/01/2000" maxdate="#{now}" pattern="dd/MM/yyyy">
+						<f:convertDateTime type="date" pattern="dd/MM/yyyy" locale="pt_BR" timeZone="America/Sao_Paulo"/>
+					</p:calendar>
+					</h:panelGrid>
+				</p:fieldset>
+
+				<p:fieldset legend="Pesagem e Medidas" toggleable="true" toggleSpeed="500">
+					<p:fieldset>
+						<h:panelGrid columns="2">
+						<p:outputLabel for="peso" value="Peso:" />
+						<p:inputText id="peso" maxlength="5" size="5" 
+							value="#{avaliacaoFisicaBean.avaliacaoFisica.peso}" required="true"
+							requiredMessage="O campo 'Peso' é obrigatório!!"
+							converterMessage="Informe um valor válido para o campo 'Peso'!!"
+							validatorMessage="Informe um valor entre 1,0 e 500 para o campo 'Peso'">
+							<f:validateDoubleRange minimum="1.0" maximum="500" />
+							<f:convertNumber locale="pt_BR" minFractionDigits="1" />
+						</p:inputText>
+						
+						<p:outputLabel for="altura" value="Altura:" />
+						<p:inputText id="altura" maxlength="4" size="5" 
+							value="#{avaliacaoFisicaBean.avaliacaoFisica.altura}" required="true"
+							requiredMessage="O campo 'Altura' é obrigatório!!"
+							converterMessage="Informe um valor válido para o campo 'Altura'!!"
+							validatorMessage="Informe um valor entre 0,10 e 3 para o campo 'Altura'">
+							<f:validateDoubleRange minimum="0.10" maximum="3" />
+							<f:convertNumber locale="pt_BR" minFractionDigits="2" />
+						</p:inputText>
+						</h:panelGrid>
+					</p:fieldset>
+
+					<p:fieldset>
+						<h:panelGrid columns="2">	
+						<p:outputLabel for="pescoco" value="Pescoço:" />
+						<p:inputText id="pescoco" maxlength="5" size="5" 
+							value="#{avaliacaoFisicaBean.avaliacaoFisica.pescoco}" required="true"
+							requiredMessage="O campo 'Pescoço' é obrigatório!!"
+							converterMessage="Informe um valor válido para o campo 'Pescoço'!!"
+							validatorMessage="Informe um valor entre 000,1 e 500 para o campo 'Pescoço'">
+							<f:validateDoubleRange minimum="0.1" maximum="500" />
+							<f:convertNumber locale="pt_BR" minFractionDigits="1" />
+						</p:inputText>
+	
+						<p:outputLabel for="ombros" value="Ombros:" />
+						<p:inputText id="ombros" maxlength="5" size="5" 
+							value="#{avaliacaoFisicaBean.avaliacaoFisica.ombros}" required="true"
+							requiredMessage="O campo 'Ombro' é obrigatório!!"
+							converterMessage="Informe um valor válido para o campo 'Ombro'!!"
+							validatorMessage="Informe um valor entre 000,1 e 500 para o campo 'Ombro'">
+							<f:validateDoubleRange minimum="0.1" maximum="500" />
+							<f:convertNumber locale="pt_BR" minFractionDigits="1" />
+						</p:inputText>
+	
+						<p:outputLabel for="toraxNml" value="Tórax Normal:" />
+						<p:inputText id="toraxNml" maxlength="5" size="5" 
+							value="#{avaliacaoFisicaBean.avaliacaoFisica.toraxNormal}" required="true"
+							requiredMessage="O campo 'Tórax Normal' é obrigatório!!"
+							converterMessage="Informe um valor válido para o campo 'Tórax Normal'!!"
+							validatorMessage="Informe um valor entre 000,1 e 500 para o campo 'Tórax Normal'">
+							<f:validateDoubleRange minimum="0.1" maximum="500" />
+							<f:convertNumber locale="pt_BR" minFractionDigits="1" />
+						</p:inputText>
+		
+						<p:outputLabel for="toraxInsp" value="Tórax Inspirado:" />
+						<p:inputText id="toraxInsp" maxlength="5" size="5" 
+							value="#{avaliacaoFisicaBean.avaliacaoFisica.toraxInspira}" required="true"
+							requiredMessage="O campo 'Tórax Inspirado' é obrigatório!!"
+							converterMessage="Informe um valor válido para o campo 'Tórax Inspirado'!!"
+							validatorMessage="Informe um valor entre 000,1 e 500 para o campo 'Tórax Inspirado'">
+							<f:validateDoubleRange minimum="0.1" maximum="500" />
+							<f:convertNumber locale="pt_BR" minFractionDigits="1" />
+						</p:inputText>
+						
+						<p:outputLabel for="toraxExp" value="Tórax Expirado:" />
+						<p:inputText id="toraxExp" maxlength="5" size="5" 
+							value="#{avaliacaoFisicaBean.avaliacaoFisica.toraxExpira}" required="true"
+							requiredMessage="O campo 'Tórax Expirado' é obrigatório!!"
+							converterMessage="Informe um valor válido para o campo 'Tórax Expirado'!!"
+							validatorMessage="Informe um valor entre 000,1 e 500 para o campo 'Tórax Expirado'">
+							<f:validateDoubleRange minimum="0.1" maximum="500" />
+							<f:convertNumber locale="pt_BR" minFractionDigits="1" />
+						</p:inputText>
+
+						<p:outputLabel for="abdomen" value="Abdômen:" />
+						<p:inputText id="abdomen" maxlength="5" size="5" 
+							value="#{avaliacaoFisicaBean.avaliacaoFisica.abdmn}" required="true"
+							requiredMessage="O campo 'Abdômen' é obrigatório!!"
+							converterMessage="Informe um valor válido para o campo 'Abdômen'!!"
+							validatorMessage="Informe um valor entre 000,1 e 500 para o campo 'Abdômen'">
+							<f:validateDoubleRange minimum="0.1" maximum="500" />
+							<f:convertNumber locale="pt_BR" minFractionDigits="1" />
+						</p:inputText>
+						</h:panelGrid>
+					</p:fieldset>
+
+					<p:fieldset>
+						<h:panelGrid columns="2">
+						<p:outputLabel for="braEsq" value="Braço Esquerdo:" />
+						<p:inputText id="braEsq" maxlength="5" size="5" 
+							value="#{avaliacaoFisicaBean.avaliacaoFisica.bracoEsq}" required="true"
+							requiredMessage="O campo 'Braço Esquerdo' é obrigatório!!"
+							converterMessage="Informe um valor válido para o campo 'Braço Esquerdo'!!"
+							validatorMessage="Informe um valor entre 000,1 e 500 para o campo 'Braço Esquerdo'">
+							<f:validateDoubleRange minimum="0.1" maximum="500" />
+							<f:convertNumber locale="pt_BR" minFractionDigits="1" />
+						</p:inputText>
+		
+						<p:outputLabel for="braDir" value="Braço Direito:" />
+						<p:inputText id="braDir" maxlength="5" size="5" 
+							value="#{avaliacaoFisicaBean.avaliacaoFisica.bracoDir}" required="true"
+							requiredMessage="O campo 'Braço Direito' é obrigatório!!"
+							converterMessage="Informe um valor válido para o campo 'Braço Direito'!!"
+							validatorMessage="Informe um valor entre 000,1 e 500 para o campo 'Braço Direito'">
+							<f:validateDoubleRange minimum="0.1" maximum="500" />
+							<f:convertNumber locale="pt_BR" minFractionDigits="1" />
+						</p:inputText>				
+		
+						<p:outputLabel for="antEsq" value="Antebraço Esquerdo:" />
+						<p:inputText id="antEsq" maxlength="5" size="5" 
+							value="#{avaliacaoFisicaBean.avaliacaoFisica.antebracoEsq}" required="true"
+							requiredMessage="O campo 'Antebraço Esquerdo' é obrigatório!!"
+							converterMessage="Informe um valor válido para o campo 'Antebraço Esquerdo'!!"
+							validatorMessage="Informe um valor entre 000,1 e 500 para o campo 'Antebraço Esquerdo'">
+							<f:validateDoubleRange minimum="0.1" maximum="500" />
+							<f:convertNumber locale="pt_BR" minFractionDigits="1" />
+						</p:inputText>
+		
+						<p:outputLabel for="antDir" value="Antebraço Direito:" />
+						<p:inputText id="antDir" maxlength="5" size="5" 
+							value="#{avaliacaoFisicaBean.avaliacaoFisica.antebracoDir}" required="true"
+							requiredMessage="O campo 'Antebraço Direito' é obrigatório!!"
+							converterMessage="Informe um valor válido para o campo 'Antebraço Direito'!!"
+							validatorMessage="Informe um valor entre 000,1 e 500 para o campo 'Antebraço Direito'">
+							<f:validateDoubleRange minimum="0.1" maximum="500" />
+							<f:convertNumber locale="pt_BR" minFractionDigits="1" />
+						</p:inputText>
+						</h:panelGrid>
+					</p:fieldset>
+
+					<p:fieldset>
+						<h:panelGrid columns="2">	
+						<p:outputLabel for="cintura" value="Cintura:" />
+						<p:inputText id="cintura" maxlength="5" size="5" 
+							value="#{avaliacaoFisicaBean.avaliacaoFisica.cintura}" required="true"
+							requiredMessage="O campo 'Cintura' é obrigatório!!"
+							converterMessage="Informe um valor válido para o campo 'Cintura'!!"
+							validatorMessage="Informe um valor entre 000,1 e 500 para o campo 'Cintura'">
+							<f:validateDoubleRange minimum="0.1" maximum="500" />
+							<f:convertNumber locale="pt_BR" minFractionDigits="1" />
+						</p:inputText>
+	
+						<p:outputLabel for="quadril" value="Quadril:" />
+						<p:inputText id="quadril" maxlength="5" size="5" 
+							value="#{avaliacaoFisicaBean.avaliacaoFisica.quadril}" required="true"
+							requiredMessage="O campo 'Quadril' é obrigatório!!"
+							converterMessage="Informe um valor válido para o campo 'Quadril'!!"
+							validatorMessage="Informe um valor entre 000,1 e 500 para o campo 'Quadril'">
+							<f:validateDoubleRange minimum="0.1" maximum="500" />
+							<f:convertNumber locale="pt_BR" minFractionDigits="1" />
+						</p:inputText>
+						</h:panelGrid>
+					</p:fieldset>
+
+					<p:fieldset>
+						<h:panelGrid columns="2">	
+						<p:outputLabel for="cxEsq" value="Coxa Esquerda:" />
+						<p:inputText id="cxEsq" maxlength="5" size="5" 
+							value="#{avaliacaoFisicaBean.avaliacaoFisica.coxaEsq}" required="true"
+							requiredMessage="O campo 'Coxa Esquerda' é obrigatório!!"
+							converterMessage="Informe um valor válido para o campo 'Coxa Esquerda'!!"
+							validatorMessage="Informe um valor entre 000,1 e 500 para o campo 'Coxa Esquerda'">
+							<f:validateDoubleRange minimum="0.1" maximum="500" />
+							<f:convertNumber locale="pt_BR" minFractionDigits="1" />
+						</p:inputText>
+		
+						<p:outputLabel for="cxDir" value="Coxa Direita:" />
+						<p:inputText id="cxDir" maxlength="5" size="5" 
+							value="#{avaliacaoFisicaBean.avaliacaoFisica.coxaDir}" required="true"
+							requiredMessage="O campo 'Coxa Direita' é obrigatório!!"
+							converterMessage="Informe um valor válido para o campo 'Coxa Direita'!!"
+							validatorMessage="Informe um valor entre 000,1 e 500 para o campo 'Coxa Direita'">
+							<f:validateDoubleRange minimum="0.1" maximum="500" />
+							<f:convertNumber locale="pt_BR" minFractionDigits="1" />
+						</p:inputText>
+		
+						<p:outputLabel for="pantEsq" value="Panturrilha Esquerda:" />
+						<p:inputText id="pantEsq" maxlength="5" size="5" 
+							value="#{avaliacaoFisicaBean.avaliacaoFisica.pantuEsq}" required="true"
+							requiredMessage="O campo 'Panturrilha Esquerda' é obrigatório!!"
+							converterMessage="Informe um valor válido para o campo 'Panturrilha Esquerda'!!"
+							validatorMessage="Informe um valor entre 000,1 e 500 para o campo 'Panturrilha Esquerda'">
+							<f:validateDoubleRange minimum="0.1" maximum="500" />
+							<f:convertNumber locale="pt_BR" minFractionDigits="1" />
+						</p:inputText>
+		
+						<p:outputLabel for="pantDir" value="Panturrilha Direita:" />
+						<p:inputText id="pantDir" maxlength="5" size="5" 
+							value="#{avaliacaoFisicaBean.avaliacaoFisica.pantuDir}" required="true"
+							requiredMessage="O campo 'Panturrilha Direita' é obrigatório!!"
+							converterMessage="Informe um valor válido para o campo 'Panturrilha Direita'!!"
+							validatorMessage="Informe um valor entre 000,1 e 500 para o campo 'Panturrilha Direita'">
+							<f:validateDoubleRange minimum="0.1" maximum="500" />
+							<f:convertNumber locale="pt_BR" minFractionDigits="1" />
+						</p:inputText>	
+					</h:panelGrid>
+					</p:fieldset>
+				</p:fieldset>
+			</h:panelGroup>
+			
+			<h:panelGrid columns="2" styleClass="botoesCentralizar">
+				<p:commandButton value="Salvar" actionListener="#{avaliacaoFisicaBean.salvar}"
+					update=":mensagem :formCadastro:painel :formListagem:tabela" 
+					icon="ui-icon-disk" title="Salva/Atualiza a avaliação física"/>
+				<p:commandButton value="Fechar" oncomplete="PF('dialogo').hide();"
+					icon="ui-icon-close" title="Fecha a tela"/>
+			</h:panelGrid>
+		</h:form>
+	</p:dialog>
+</ui:define>
+</ui:composition>

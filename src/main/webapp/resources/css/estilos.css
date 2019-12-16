@@ -1,0 +1,47 @@
+@CHARSET "UTF-8";
+
+.imagemCentralizada{
+	display: block;
+	margin-left: auto;
+	margin-right: auto;
+}
+
+.divCabecalho{
+	position: relative;
+	margin-top: -200px;
+	margin-right: auto;
+	margin-left: auto;
+	padding: 0px;
+}
+
+.divConteudo{
+	position: relative;
+	margin-top: 160px;
+	margin-left: auto;
+	margin-right: auto;
+}
+
+.menu{
+	display: block;
+	font-size: 11pt;
+	border: 1px solid #FFFFFF;
+	box-shadow: 1px 1px 4px black;
+}
+
+.submenu{
+	display: block;
+	background-color: #FFFFFF;
+	-webkit-transiction: background-color 2s;
+	-moz-transiction: background-color 2s;
+	-o-transiction: background-color 2s;
+	-ms-transiction: background-color 2s;
+	transition: background-color 2s;
+}
+.submenu:hover {
+	background-color: #CDCD00;
+}
+
+.ui-widget, ui.widget .ui-widget{
+	font-size: 95% !important;
+	font-family: Comic Sans MS;
+}

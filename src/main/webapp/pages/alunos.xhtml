@@ -1,0 +1,375 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://xmlns.jcp.org/jsf/html"
+	xmlns:f="http://xmlns.jcp.org/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+	template="/templates/modelo.xhtml">
+
+<ui:define name="conteudo">
+	<h:form id="formListagem">
+		<p:panel header="Listagem de Alunos">
+					
+			<p:dataTable id="tabela" emptyMessage="Nenhum registro encontrado."
+				paginator="true" value="#{alunoBean.alunos}" var="aluno" rows="10" 
+				rowStyleClass="#{(aluno.status) eq 'Inativo' ? 'condicao1' : 'condicao2'}"
+				scrollable="true" scrollWidth="97%" scrollHeight="230" paginatorPosition="top"
+				paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} 
+				{NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+					rowsPerPageTemplate="5,10,15"
+					currentPageReportTemplate="{currentPage} de {totalPages}">
+				<f:facet name="header">
+					<p:commandButton id="toggler" type="button" value="Colunas" style="float:left" icon="ui-icon-calculator" />
+			        <p:columnToggler datasource="tabela" trigger="toggler" />
+					<p:commandButton icon="ui-icon-plus" value="Novo Aluno" style="float:middle" oncomplete="PF('dialogo').show();" 
+						actionListener="#{alunoBean.novo}" 
+						update=":formCadastro:painel">
+						<f:actionListener type="org.omnifaces.eventlistener.ResetInputAjaxActionListener" />
+					</p:commandButton>
+					<p:commandButton icon="ui-icon-print" value="Imprimir" style="float:right" 
+						actionListener="#{alunoBean.imprimir}"/>
+					
+				</f:facet>
+
+				<p:column headerText="Nome" footerText="Nome" sortBy="#{aluno.nome}" 
+					filterBy="#{aluno.nome}" filterMatchMode="contains" 
+					style="width:200px;" filterStyle="width:150px;" filterMaxLength="60">
+					<h:outputText value="#{aluno.nome}" />
+				</p:column>
+				<p:column headerText="Cidade" footerText="Cidade" sortBy="#{aluno.cidade}" 
+					filterBy="#{aluno.cidade}" filterMatchMode="contains"
+					style="width:200px;" filterStyle="width:150px" filterMaxLenght="60">
+					<h:outputText value="#{aluno.cidade} - #{aluno.estado}" />
+				</p:column>
+				<p:column headerText="Idade" footerText="Idade" sortBy="#{aluno.idade}" 
+					filterBy="#{aluno.idade}" filterMatchMode="contains" 
+					style="width:60px;" filterStyle="width:25px;" filterMaxLength="2">
+					<h:outputText value="#{aluno.idade}" />
+				</p:column>
+				<p:column headerText="Status" footerText="Status" 
+					filterBy="#{aluno.status}" 
+					style="width:80px;" filterStyle="width:40px;" filterMaxLength="8">
+					<h:outputText value="#{aluno.status}" />
+				</p:column>
+				<p:column headerText="Nome do Responsável" footerText="Nome do Responsável" 
+					filterBy="#{aluno.nomeResp}" filterMatchMode="contains"
+					style="width:150px;" filterStyle="width:75px;" filterMaxLength="60">
+					<h:outputText value="#{aluno.nomeResp}" />
+				</p:column>
+				<p:column headerText="CPF do Responsável" footerText="CPF do Responsável" 
+					filterBy="#{aluno.cpfResp}" filterMatchMode="contains"
+					style="width:150px;" filterStyle="width:130px;" filterMaxLength="14">
+					<h:outputText value="#{aluno.cpfResp}" />
+				</p:column>
+				<p:column headerText="Celular do Responsável" footerText="Celular do Responsável" 
+					filterBy="#{aluno.celResp}" filterMatchMode="contains"
+					style="width:150px;" filterStyle="width:130px;" filterMaxLength="14">
+					<h:outputText value="#{aluno.celResp}" />
+				</p:column>
+				<p:column headerText="Opções" footerText="Opções" style="width:110px;">
+					<p:commandButton icon="ui-icon-trash" title="Excluir aluno"
+						actionListener="#{alunoBean.excluir}"
+						update=":mensagem :formListagem:tabela">
+						<p:confirm header="Confirmação" message="Deseja excluir o aluno?" 
+							icon="ui-icon-alert"/>
+						<f:attribute name="alunoSelecionado" value="#{aluno}" />
+					</p:commandButton>
+					<p:commandButton icon="ui-icon-pencil" title="Alterar aluno"
+						actionListener="#{alunoBean.editar}" 
+						update=":formCadastro:painel"
+						oncomplete="PF('dialogo').show();">
+						<f:attribute name="alunoSelecionado" value="#{aluno}" />
+						<f:actionListener type="org.omnifaces.eventlistener.ResetInputAjaxActionListener" />
+					</p:commandButton>
+					<p:commandButton icon="ui-icon-person" title="Visualizar aluno"
+						actionListener="#{alunoBean.visualizar}"
+						update=":formVisual:painel"
+						oncomplete="PF('visual').show();">
+						<f:attribute name="alunoSelecionado" value="#{aluno}" />
+					</p:commandButton>
+				</p:column>
+			</p:dataTable>
+			
+			<p:confirmDialog global="true">
+				<p:commandButton value="Sim" type="button" 
+					styleClass="ui-confirmdialog-yes" icon="ui-icon-check" />
+				<p:commandButton value="Não" type="button" 
+					styleClass="ui-confirmdialog-no" icon="ui-icon-close" />
+			</p:confirmDialog>			
+		</p:panel>
+	</h:form>
+
+	<p:dialog header="Visualizar Foto" widgetVar="visual"
+		draggable="false" resizable="false" modal="true">
+		<h:form id="formVisual" enctype="multipart/form-data">
+			<p:fieldset>
+				<h:panelGrid id="painel" style="margin:0 auto;">
+					<p:outputLabel for="foto" value="Foto:" />
+					<p:graphicImage id="foto" value="#{imagemBean.foto}"
+						width="450px" heigth="450px">
+						<f:param name="caminho" value="#{alunoBean.aluno.urlImg}"/>
+					</p:graphicImage>
+				</h:panelGrid>
+			</p:fieldset>
+		</h:form>
+	</p:dialog>
+
+	<p:dialog header="Cadastro de Alunos" widgetVar="dialogo" 
+		draggable="false" resizable="false" modal="true" closable="false">
+		<h:form id="formCadastro" enctype="multipart/form-data">
+		
+			<h:panelGroup id="painel" layout="block" style="height:550px;width:500px;overflow-y:scroll">
+			
+				<p:fieldset>
+					<h:panelGrid columns="2">
+					<p:outputLabel for="nome" value="Nome:" />
+					<p:inputText id="nome" maxlength="60" size="44" 
+						value="#{alunoBean.aluno.nome}" required="true"
+						requiredMessage="O campo 'Nome' é obrigatório!!" />
+					</h:panelGrid>
+				</p:fieldset>
+				
+				<p:fieldset legend="Localização" toggleable="true" toggleSpeed="500">
+					<h:panelGrid columns="2">
+					<p:outputLabel for="end" value="Endereço:" />
+					<p:inputText id="end" maxlength="60" size="40" 
+						value="#{alunoBean.aluno.endereco}" required="true"
+						requiredMessage="O campo 'Endereço' é obrigatório!!" />
+					
+					<p:outputLabel for="compl" value="Complemento:" />
+					<p:inputText id="compl" maxlength="10" size="12" 
+						value="#{alunoBean.aluno.complemento}" />
+					
+					<p:outputLabel for="bairro" value="Bairro:" />
+					<p:inputText id="bairro" maxlength="50" size="40" 
+						value="#{alunoBean.aluno.bairro}" required="true"
+						requiredMessage="O campo 'Bairro' é obrigatório!!" />
+					
+					<p:outputLabel for="cep" value="CEP:" />
+					<p:inputMask id="cep" mask="99.999-999" size="12" 
+						value="#{alunoBean.aluno.cep}" required="true"
+						requiredMessage="O campo 'CEP' é obrigatório!!" />
+					
+					<p:outputLabel for="cidade" value="Cidade:" />
+					<p:inputText id="cidade" maxlength="60" size="40" 
+						value="#{alunoBean.aluno.cidade}" required="true"
+						requiredMessage="O campo 'Cidade' é obrigatório!!" />
+					
+					<p:outputLabel for="uf" value="Estado:" />
+					<p:selectOneMenu id="uf" filter="true"
+						value="#{alunoBean.aluno.estado}" required="true"
+						requiredMessage="O campo 'Estado' é obrigatório!!">
+						<f:selectItem noSelectionOption="true" itemLabel="" />
+						<f:selectItem itemValue="AC" itemLabel="AC" />
+						<f:selectItem itemValue="AL" itemLabel="AL" />
+						<f:selectItem itemValue="AP" itemLabel="AP" />
+						<f:selectItem itemValue="AM" itemLabel="AM" />
+						<f:selectItem itemValue="BA" itemLabel="BA" />
+						<f:selectItem itemValue="CE" itemLabel="CE" />
+						<f:selectItem itemValue="DF" itemLabel="DF" />
+						<f:selectItem itemValue="ES" itemLabel="ES" />
+						<f:selectItem itemValue="GO" itemLabel="GO" />
+						<f:selectItem itemValue="MA" itemLabel="MA" />
+						<f:selectItem itemValue="MG" itemLabel="MG" />
+						<f:selectItem itemValue="MS" itemLabel="MS" />
+						<f:selectItem itemValue="MT" itemLabel="MT" />
+						<f:selectItem itemValue="PA" itemLabel="PA" />
+						<f:selectItem itemValue="PB" itemLabel="PB" />
+						<f:selectItem itemValue="PE" itemLabel="PE" />
+						<f:selectItem itemValue="PI" itemLabel="PI" />
+						<f:selectItem itemValue="PR" itemLabel="PR" />
+						<f:selectItem itemValue="RJ" itemLabel="RJ" />
+						<f:selectItem itemValue="RN" itemLabel="RN" />
+						<f:selectItem itemValue="RO" itemLabel="RO" />
+						<f:selectItem itemValue="RR" itemLabel="RR" />
+						<f:selectItem itemValue="RS" itemLabel="RS" />
+						<f:selectItem itemValue="SC" itemLabel="SC" />
+						<f:selectItem itemValue="SE" itemLabel="SE" />
+						<f:selectItem itemValue="SP" itemLabel="SP" />
+						<f:selectItem itemValue="TO" itemLabel="TO" />
+					</p:selectOneMenu>
+					</h:panelGrid>
+				</p:fieldset>
+				
+				<p:fieldset legend="Contato" toggleable="true" toggleSpeed="500">
+					<h:panelGrid columns="2">
+					<p:outputLabel for="email" value="E-mail:" />
+					<p:inputText id="email" maxlength="45" size="43" 
+						value="#{alunoBean.aluno.email}" required="true" 
+						requiredMessage="O campo 'E-mail' é obrigatório!!" 
+						validatorMessage="Informe um endereço de 'E-mail' válido!!">
+						<f:validateRegex pattern="(^[_A-Za-z0-9-]+(\.[_A-Za-z0-9-]+)*@[A-Za-z0-9]+(\.[A-Za-z0-9]+)*(\.[A-Za-z]{2,})$)" />
+					</p:inputText>
+									
+					<p:outputLabel for="tel" value="Telefone:" />
+					<p:inputMask id="tel" mask="(99)9999-9999" size="15" 
+						value="#{alunoBean.aluno.telefone}" />
+					
+					<p:outputLabel for="cel" value="Celular:" />
+					<p:inputMask id="cel" mask="(99)99999-9999" size="15" 
+						value="#{alunoBean.aluno.celular}" />
+					</h:panelGrid>
+				</p:fieldset>
+
+				<p:fieldset legend="Localização" toggleable="true" toggleSpeed="500">
+					<h:panelGrid columns="2">
+					<p:outputLabel for="sexo" value="Sexo:" />
+					<p:selectOneMenu id="sexo"  
+						value="#{alunoBean.aluno.sexo}" required="true"
+						requiredMessage="O campo 'Sexo' é obrigatório!!">
+						<f:selectItem noSelectionOption="true" itemLabel="" />
+						<f:selectItem itemValue="F" itemLabel="F" />
+						<f:selectItem itemValue="M" itemLabel="M" />
+					</p:selectOneMenu>
+					
+					<p:outputLabel for="cpf" value="CPF:" />
+					<p:inputMask id="cpf" mask="999.999.999-99" size="14" 
+						value="#{alunoBean.aluno.cpf}" 
+						converterMessage="Informe um valor válido para o campo 'CPF'!!" />
+					
+					<p:outputLabel for="rg" value="RG:" />
+					<p:inputMask id="rg" mask="99.999.999-9" size="14" 
+						value="#{alunoBean.aluno.rg}" required="true"
+						requiredMessage="O campo 'RG' é obrigatório!!" 
+						converterMessage="Informe um valor válido para o campo 'RG'!!" />
+					
+					<p:outputLabel for="ufrg" value="UFRG:" />
+					<p:selectOneMenu id="ufrg"  
+						value="#{alunoBean.aluno.ufrg}" required="true"
+						requiredMessage="O campo 'UFRG' é obrigatório!!">
+						<f:selectItem noSelectionOption="true" itemLabel="" />
+						<f:selectItem itemValue="AC" itemLabel="SSP/AC" />
+						<f:selectItem itemValue="AL" itemLabel="SSP/AL" />
+						<f:selectItem itemValue="AP" itemLabel="SSP/AP" />
+						<f:selectItem itemValue="AM" itemLabel="SSP/AM" />
+						<f:selectItem itemValue="BA" itemLabel="SSP/BA" />
+						<f:selectItem itemValue="CE" itemLabel="SSP/CE" />
+						<f:selectItem itemValue="DF" itemLabel="SSP/DF" />
+						<f:selectItem itemValue="ES" itemLabel="SSP/ES" />
+						<f:selectItem itemValue="GO" itemLabel="SSP/GO" />
+						<f:selectItem itemValue="MA" itemLabel="SSP/MA" />
+						<f:selectItem itemValue="MG" itemLabel="SSP/MG" />
+						<f:selectItem itemValue="MS" itemLabel="SSP/MS" />
+						<f:selectItem itemValue="MT" itemLabel="SSP/MT" />
+						<f:selectItem itemValue="PA" itemLabel="SSP/PA" />
+						<f:selectItem itemValue="PB" itemLabel="SSP/PB" />
+						<f:selectItem itemValue="PE" itemLabel="SSP/PE" />
+						<f:selectItem itemValue="PI" itemLabel="SSP/PI" />
+						<f:selectItem itemValue="PR" itemLabel="SSP/PR" />
+						<f:selectItem itemValue="RJ" itemLabel="SSP/RJ" />
+						<f:selectItem itemValue="RN" itemLabel="SSP/RN" />
+						<f:selectItem itemValue="RO" itemLabel="SSP/RO" />
+						<f:selectItem itemValue="RR" itemLabel="SSP/RR" />
+						<f:selectItem itemValue="RS" itemLabel="SSP/RS" />
+						<f:selectItem itemValue="SC" itemLabel="SSP/SC" />
+						<f:selectItem itemValue="SE" itemLabel="SSP/SE" />
+						<f:selectItem itemValue="SP" itemLabel="SSP/SP" />
+						<f:selectItem itemValue="TO" itemLabel="SSP/TO" />
+					</p:selectOneMenu>
+					
+					<p:outputLabel for="dtNasc" value="Data de Nascimento:" />
+					<p:calendar id="dtNasc" size="10"
+						value="#{alunoBean.aluno.dtNasc}" required="true"
+						requiredMessage="O campo 'Data de Nascimento' é obrigatório!!" 
+						locale="pt_BR" mindate="01/01/1915" maxdate="#{now}" pattern="dd/MM/yyyy">
+						<f:convertDateTime type="date" pattern="dd/MM/yyyy" locale="pt_BR" timeZone="America/Sao_Paulo"/>
+						<p:ajax onchange="#{alunoBean.calcularIdade(dtNasc)}" update="idade"/>
+					</p:calendar>
+					
+					<p:outputLabel for="idade" value="Idade:" />
+					<p:inputText id="idade" maxlength="2" size="3"  
+						value="#{alunoBean.idade}" disabled="false" required="true"
+						requiredMessage="O campo 'Idade' é obrigatório!!" 
+						converterMessage="Informe um valor válido para o campo 'Idade'!!"
+						validatorMessage="Informe um valor entre 1 e 99 para o campo 'Idade'!!">
+						<f:validateLongRange minimum="1" maximum="99" />
+					</p:inputText>
+					
+					<p:outputLabel for="estCiv" value="Estado Civil:" />
+					<p:selectOneMenu id="estCiv" 
+						value="#{alunoBean.aluno.estCivil}" required="true"
+						requiredMessage="O campo 'Estado Civil' é obrigatório!!">
+						<f:selectItem noSelectionOption="true" itemLabel="" />
+						<f:selectItem itemValue="Solteiro(a)" itemLabel="Solteiro(a)" />
+						<f:selectItem itemValue="Casado(a)" itemLabel="Casado(a)" />
+						<f:selectItem itemValue="Divorciado(a)" itemLabel="Divorciado(a)" />
+						<f:selectItem itemValue="Viúvo(a)" itemLabel="Viúvo(a)" />
+						<f:selectItem itemValue="Separado(a)" itemLabel="Separado(a)" />
+						<f:selectItem itemValue="Companheiro(a)" itemLabel="Companheiro(a)" />
+					</p:selectOneMenu>
+					</h:panelGrid>
+				</p:fieldset>
+
+				<p:fieldset legend="Informações do Sistema" toggleable="true" toggleSpeed="500">
+					<h:panelGrid columns="2">
+					<p:outputLabel for="status" value="Status:" />
+					<p:selectOneMenu id="status" 
+						value="#{alunoBean.aluno.status}" required="true"
+						requiredMessage="O campo 'Status' é obrigatório!!">
+						<f:selectItem noSelectionOption="true" itemLabel="" />
+						<f:selectItem itemValue="Ativo" itemLabel="Ativo(a)" />
+						<f:selectItem itemValue="Inativo" itemLabel="Inativo(a)" />
+					</p:selectOneMenu>
+					
+					<p:outputLabel for="dtCad" value="Data de Cadastro:" />
+					<p:calendar id="dtCad" size="10"
+						value="#{alunoBean.aluno.dtCad}" required="true"
+						requiredMessage="O campo 'Data de Cadastro' é obrigatório!!"
+						locale="pt_BR" mindate="01/01/1915" maxdate="#{now}" pattern="dd/MM/yyyy">
+						<f:convertDateTime type="date" pattern="dd/MM/yyyy" locale="pt_BR" timeZone="America/Sao_Paulo"/>
+					</p:calendar>
+					</h:panelGrid>
+				</p:fieldset>
+				
+				<p:fieldset legend="Responsável" toggleable="true" toggleSpeed="500">
+					<h:panelGrid columns="2">
+					<p:outputLabel for="nmResp" value="Nome do Responsável:" />
+					<p:inputText id="nmResp" maxlength="60" size="40" 
+						value="#{alunoBean.aluno.nomeResp}" />
+				
+					<p:outputLabel for="endResp" value="Endereço do Responsável:" />
+					<p:inputText id="endResp" maxlength="60" size="40" 
+						value="#{alunoBean.aluno.endResp}" />
+					
+					<p:outputLabel for="cpfResp" value="CPF do Responsável:" />
+					<p:inputMask id="cpfResp" mask="999.999.999-99" size="15" 
+						value="#{alunoBean.aluno.cpfResp}" required="true"
+						requiredMessage="O campo 'CPF do Responsável' é obrigatório!!"
+						converterMessage="Informe um valor válido para o campo 'CPF'!!" />
+					
+					<p:outputLabel for="telResp" value="Telefone do Responsável:" />
+					<p:inputMask id="telResp" mask="(99)9999-9999" size="15" 
+						value="#{alunoBean.aluno.telResp}" />
+					
+					<p:outputLabel for="celResp" value="Celular do Responsável:" />
+					<p:inputMask id="celResp" mask="(99)99999-9999" size="15" 
+						value="#{alunoBean.aluno.celResp}" />
+					</h:panelGrid>
+				</p:fieldset>
+
+				<p:fieldset legend="Upload de Foto">
+					<p:outputLabel for="upload" value="Upload:" />
+					<p:fileUpload id="upload" mode="advanced" fileUploadListener="#{alunoBean.upload}"
+						update=":mensagem :formCadastro:foto" auto="true"/>
+						
+					<p:outputLabel for="foto" value="Foto:" />
+					<p:graphicImage id="foto" value="#{imagemBean.foto}"
+						width="150px" heigth="150px">
+						<f:param name="caminho" value="#{alunoBean.aluno.urlImg}"/>
+					</p:graphicImage>
+				</p:fieldset>
+			</h:panelGroup>
+			
+			<h:panelGrid columns="2" styleClass="botoesCentralizar">
+				<p:commandButton value="Salvar" actionListener="#{alunoBean.salvar}"
+					update=":mensagem :formCadastro:painel :formListagem:tabela" 
+					icon="ui-icon-disk" title="Salva/Atualiza o aluno"/>
+				<p:commandButton value="Fechar" oncomplete="PF('dialogo').hide();"
+					icon="ui-icon-close" title="Fecha a tela"/>
+			</h:panelGrid>
+		</h:form>
+	</p:dialog>
+</ui:define>
+</ui:composition>

@@ -1,0 +1,27 @@
+.condicao1 { 
+	text-align:center;
+	background:Gainsboro;    
+    color: black;
+}
+.condicao2 {
+	text-align:center;
+	background:GhostWhite;
+	color: black;
+}
+.condicao3 {
+	text-align:center;
+	background:Ivory;
+	color: black;
+}
+
+p:dataTable#tabela {
+	margin-right: 10px;
+}
+
+.filterBy {
+	background:Yellow;
+}
+
+.botoesCentralizar {
+	margin: 0 auto;
+}

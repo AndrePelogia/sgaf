@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://xmlns.jcp.org/jsf/html"
+	xmlns:f="http://xmlns.jcp.org/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+	template="/templates/modelo.xhtml">
+
+<ui:define name="conteudo">	
+	<h:form id="formListagem">
+		<p:panel header="Listagem de Empresas">
+		
+			<p:dataTable id="tabela" emptyMessage="Nenhum registro encontrado." style="text-align:center;"
+				paginator="true" value="#{empresaBean.empresas}" var="empresa" rows="10" 
+				scrollable="true" scrollWidth="97%" scrollHeight="230" paginatorPosition="top"
+				paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} 
+				{NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+					rowsPerPageTemplate="5,10,15"
+					currentPageReportTemplate="{currentPage} de {totalPages}">
+				<f:facet name="header">
+					<p:commandButton id="toggler" type="button" value="Colunas" style="float:left" icon="ui-icon-calculator" />
+			        <p:columnToggler datasource="tabela" trigger="toggler" />
+					<p:commandButton value="Nova Empresa" style="float:right" oncomplete="PF('dialogo').show();" 
+						actionListener="#{empresaBean.novo()}" 
+						update=":formCadastro:painel">
+						<f:actionListener type="org.omnifaces.eventlistener.ResetInputAjaxActionListener" />
+					</p:commandButton>
+				</f:facet>
+
+				<p:column headerText="Razão Social" footerText="Razão Social" sortBy="#{empresa.rzSocial}" 
+					filterBy="#{empresa.rzSocial}" filterMatchMode="contains"
+					style="width:150px;" filterStyle="width:75px;" filterMaxLength="60">
+					<h:outputText value="#{empresa.rzSocial}" />
+				</p:column>
+				<p:column headerText="Nome Fantasia" footerText="Nome Fantasia" sortBy="#{empresa.nomeFantasia}" 
+					filterBy="#{empresa.nomeFantasia}" filterMatchMode="contains"
+					style="width:150px;" filterStyle="width:75px;" filterMaxLength="60">
+					<h:outputText value="#{empresa.nomeFantasia}" />
+				</p:column>
+				<p:column headerText="CNPJ" footerText="CNPJ" sortBy="#{empresa.cnpj}" 
+					filterBy="#{empresa.cnpj}" filterMatchMode="contains"
+					style="width:150px;" filterStyle="width:75px;" filterMaxLength="18">
+					<h:outputText value="#{empresa.cnpj}" />
+				</p:column>
+				<p:column headerText="Cidade" footerText="Cidade" sortBy="#{empresa.cidade}"
+					filterBy="#{empresa.cidade}" filterMatchMode="contains"
+					style="width:150px;" filterStyle="width:75px;" filterMaxLength="60">
+					<h:outputText value="#{empresa.cidade} - #{empresa.estado}" />
+				</p:column>
+				<p:column headerText="E-mail" footerText="E-mail" style="width:170px;">
+					<h:outputText value="#{empresa.email}" />
+				</p:column>
+				<p:column headerText="Telefone" footerText="Telefone" style="width:130px;">
+					<h:outputText value="#{empresa.telefone}" />
+				</p:column>
+				<p:column headerText="Celular" footerText="Celular" style="width:130px;">
+					<h:outputText value="#{empresa.celular}" />
+				</p:column>
+				<p:column headerText="Opções" footerText="Opções" style="width:70px;">
+					<p:commandButton icon="ui-icon-trash" title="Excluir empresa"
+						actionListener="#{empresaBean.excluir}"
+						update=":mensagem :formListagem:tabela">
+						<p:confirm header="Confirmação" message="Deseja excluir a empresa?" 
+							icon="ui-icon-alert"/>
+						<f:attribute name="empresaSelecionada" value="#{empresa}" />	
+					</p:commandButton>
+					<p:commandButton icon="ui-icon-pencil" title="Alterar empresa"
+						actionListener="#{empresaBean.editar}" 
+						update=":formCadastro:painel"
+						oncomplete="PF('dialogo').show();">
+						<f:attribute name="empresaSelecionada" value="#{empresa}" />
+						<f:actionListener type="org.omnifaces.eventlistener.ResetInputAjaxActionListener" />
+					</p:commandButton>
+				</p:column>
+			</p:dataTable>
+			
+			<p:confirmDialog global="true">
+				<p:commandButton value="Sim" type="button" 
+					styleClass="ui-confirmdialog-yes" icon="ui-icon-check" />
+				<p:commandButton value="Não" type="button" 
+					styleClass="ui-confirmdialog-no" icon="ui-icon-close" />
+			</p:confirmDialog>
+		</p:panel>
+	</h:form>
+	
+	<p:dialog header="Cadastro de Empresas" widgetVar="dialogo" 
+		draggable="false" resizable="false" modal="true" closable="false">
+		<h:form id="formCadastro">
+			<h:panelGrid id="painel" columns="1">
+			
+			<p:fieldset legend="Dados Técnicos" toggleable="true" toggleSpeed="500" columns="2">
+				<h:panelGrid columns="2">
+				<p:outputLabel for="razSocial" value="Razão Social:" />
+				<p:inputText id="razSocial" maxlength="60" size="33" 
+					value="#{empresaBean.empresa.rzSocial}" required="true"
+					requiredMessage="O campo 'Razão Social' é obrigatório!!" />
+					
+				<p:outputLabel for="nmFantasia" value="Nome Fantasia:" />
+				<p:inputText id="nmFantasia" maxlength="60" size="33" 
+					value="#{empresaBean.empresa.nomeFantasia}" />
+				
+				<p:outputLabel for="cnpj" value="CNPJ:" />
+				<p:inputMask id="cnpj" mask="99.999.999/9999-99" size="18" 
+					value="#{empresaBean.empresa.cnpj}" required="true" 
+					requiredMessage="O campo 'CNPJ' é obrigatório!!" 
+					converterMessage="Informe um valor válido para o campo 'CNPJ'!!" />
+				
+				<p:outputLabel for="inscrEst" value="Inscrição Estadual:" />
+				<p:inputMask id="inscrEst" mask="999.999.999.999" size="18" 
+					value="#{empresaBean.empresa.inscrEstadual}" required="true"
+					requiredMessage="O campo 'Inscrição Estadual' é obrigatório!!" />
+				</h:panelGrid>
+			</p:fieldset>
+			
+			<p:fieldset legend="Localização" toggleable="true" toggleSpeed="500">
+				<h:panelGrid columns="2">
+				<p:outputLabel for="end" value="Endereço:" />
+				<p:inputText id="end" maxlength="60" size="40" 
+					value="#{empresaBean.empresa.endereco}" required="true"
+					requiredMessage="O campo 'Endereço' é obrigatório!!" />
+				
+				<p:outputLabel for="bairro" value="Bairro:" />
+				<p:inputText id="bairro" maxlength="50" size="40" 
+					value="#{empresaBean.empresa.bairro}" required="true"
+					requiredMessage="O campo 'Bairro' é obrigatório!!" />
+				
+				<p:outputLabel for="cep" value="CEP:" />
+				<p:inputMask id="cep" mask="99.999-999" size="12" 
+					value="#{empresaBean.empresa.cep}" required="true"
+					requiredMessage="O campo 'CEP' é obrigatório!!" />
+				
+				<p:outputLabel for="cidade" value="Cidade:" />
+				<p:inputText id="cidade" maxlength="60" size="40" 
+					value="#{empresaBean.empresa.cidade}" required="true"
+					requiredMessage="O campo 'Cidade' é obrigatório!!" />
+				
+				<p:outputLabel for="uf" value="Estado:" />
+				<p:selectOneMenu id="uf" filter="true"
+					value="#{empresaBean.empresa.estado}" required="true"
+					requiredMessage="O campo 'Estado' é obrigatório!!">
+					<f:selectItem noSelectionOption="true" itemLabel="" />
+					<f:selectItem itemValue="AC" itemLabel="AC" />
+					<f:selectItem itemValue="AL" itemLabel="AL" />
+					<f:selectItem itemValue="AP" itemLabel="AP" />
+					<f:selectItem itemValue="AM" itemLabel="AM" />
+					<f:selectItem itemValue="BA" itemLabel="BA" />
+					<f:selectItem itemValue="CE" itemLabel="CE" />
+					<f:selectItem itemValue="DF" itemLabel="DF" />
+					<f:selectItem itemValue="ES" itemLabel="ES" />
+					<f:selectItem itemValue="GO" itemLabel="GO" />
+					<f:selectItem itemValue="MA" itemLabel="MA" />
+					<f:selectItem itemValue="MG" itemLabel="MG" />
+					<f:selectItem itemValue="MS" itemLabel="MS" />
+					<f:selectItem itemValue="MT" itemLabel="MT" />
+					<f:selectItem itemValue="PA" itemLabel="PA" />
+					<f:selectItem itemValue="PB" itemLabel="PB" />
+					<f:selectItem itemValue="PE" itemLabel="PE" />
+					<f:selectItem itemValue="PI" itemLabel="PI" />
+					<f:selectItem itemValue="PR" itemLabel="PR" />
+					<f:selectItem itemValue="RJ" itemLabel="RJ" />
+					<f:selectItem itemValue="RN" itemLabel="RN" />
+					<f:selectItem itemValue="RO" itemLabel="RO" />
+					<f:selectItem itemValue="RR" itemLabel="RR" />
+					<f:selectItem itemValue="RS" itemLabel="RS" />
+					<f:selectItem itemValue="SC" itemLabel="SC" />
+					<f:selectItem itemValue="SE" itemLabel="SE" />
+					<f:selectItem itemValue="SP" itemLabel="SP" />
+					<f:selectItem itemValue="TO" itemLabel="TO" />
+				</p:selectOneMenu>
+				</h:panelGrid>
+			</p:fieldset>
+			
+			<p:fieldset legend="Contato" toggleable="true" toggleSpeed="500">
+				<h:panelGrid columns="2">
+				<p:outputLabel for="email" value="E-mail:" />
+				<p:inputText id="email" maxlength="45" size="42" 
+					value="#{empresaBean.empresa.email}" required="true" 
+					requiredMessage="O campo 'E-mail' é obrigatório!!" 
+					validatorMessage="Informe um endereço de 'E-mail' válido!!">
+					<f:validateRegex pattern="(^[_A-Za-z0-9-]+(\.[_A-Za-z0-9-]+)*@[A-Za-z0-9]+(\.[A-Za-z0-9]+)*(\.[A-Za-z]{2,})$)" />
+				</p:inputText>
+				
+				<p:outputLabel for="tel" value="Telefone:" />
+				<p:inputMask id="tel" mask="(99)9999-9999" size="15"
+					value="#{empresaBean.empresa.telefone}" />
+				
+				<p:outputLabel for="cel" value="Celular:" />
+				<p:inputMask id="cel" mask="(99)99999-9999" size="15" 
+					value="#{empresaBean.empresa.celular}" />
+				</h:panelGrid>
+			</p:fieldset>
+					
+			</h:panelGrid>
+			
+			<h:panelGrid columns="2" styleClass="botoesCentralizar">
+				<p:commandButton value="Salvar" actionListener="#{empresaBean.salvar}"
+					update=":mensagem :formCadastro:painel :formListagem:tabela" 
+					icon="ui-icon-disk" title="Salva/Atualiza a empresa"/>
+				<p:commandButton value="Fechar" oncomplete="PF('dialogo').hide();"
+					icon="ui-icon-close" title="Fecha a tela"/>
+			</h:panelGrid>
+		</h:form>
+	</p:dialog>
+</ui:define>
+</ui:composition>

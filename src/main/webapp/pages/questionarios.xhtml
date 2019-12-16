@@ -1,0 +1,599 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://xmlns.jcp.org/jsf/html"
+	xmlns:f="http://xmlns.jcp.org/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+	template="/templates/modelo.xhtml">
+	
+<ui:define name="conteudo">
+	<h:form id="formListagem">
+		<p:panel header="Listagem de Questionários">
+			
+			<p:dataTable id="tabela" emptyMessage="Nenhum registro encontrado." style="text-align:center;"
+				paginator="true" value="#{questionarioBean.questionarios}" var="questionario" rows="10"
+				scrollable="true" scrollWidth="97%" scrollHeight="230" paginatorPosition="top"
+				paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} 
+				{NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+					rowsPerPageTemplate="5,10,15"
+					currentPageReportTemplate="{currentPage} de {totalPages}">
+				<f:facet name="header">
+					<p:commandButton id="toggler" type="button" value="Colunas" style="float:left" icon="ui-icon-calculator" />
+			        <p:columnToggler datasource="tabela" trigger="toggler" />
+					<p:commandButton value="Novo Questionário" style="float:right" oncomplete="PF('dialogo').show();" 
+						actionListener="#{questionarioBean.novo}"
+						update=":mensagem :formCadastro:painel">
+						<f:actionListener type="org.omnifaces.eventlistener.ResetInputAjaxActionListener" />
+					</p:commandButton>
+				</f:facet>
+
+				<p:column headerText="Funcionário" footerText="Funcionário" sortBy="#{questionario.usuario.nome}"
+					filterBy="#{questionario.usuario.nome}" filterMatchMode="contains"
+					style="width:220px;" filterStyle="width:150px;" filterMaxLength="60">
+					<h:outputText value="#{questionario.usuario.nome}" />
+				</p:column>
+				<p:column headerText="Aluno" footerText="Aluno" sortBy="#{questionario.aluno.nome}"
+					filterBy="#{questionario.aluno.nome}" filterMatchMode="contains"
+					style="width:220px;" filterStyle="width:150px;" filterMaxLength="60">
+					<h:outputText value="#{questionario.aluno.nome}" />
+				</p:column>
+				<p:column headerText="Responsável" footerText="Responsável" sortBy="#{questionario.aluno.nomeResp}"
+					filterBy="#{questionario.aluno.nomeResp}" filterMatchMode="contains"
+					style="width:220px;" filterStyle="width:150px;" filterMaxLength="60">
+					<h:outputText value="#{questionario.aluno.nomeResp}" />
+				</p:column>
+				<p:column headerText="Data do Questionário" footerText="Data do Questionário" 
+					sortBy="#{questionario.dtQuestion}" style="width:90px;">
+					<h:outputText value="#{questionario.dtQuestion}">
+						<f:convertDateTime locale="pt_BR" />
+					</h:outputText>
+				</p:column>
+				<p:column headerText="Atividades Físicas?" footerText="Atividades Físicas?" 
+					filterBy="#{atividadesBean.atividade.realizaAtivFis}"
+					style="width:60px;" filterStyle="width:30px;" filterMaxLength="3">
+					<h:outputText value="#{atividadesBean.atividade.realizaAtivFis}">
+					</h:outputText>
+				</p:column>
+				<p:column headerText="Alguma Restrição?" footerText="Alguma Restrição?" 
+					filterBy="#{examesBean.exame.restricao}"
+					style="width:60px;" filterStyle="width:30px;" filterMaxLength="3">
+					<h:outputText value="#{examesBean.exame.restricao}">
+					</h:outputText>
+				</p:column>
+				
+				<p:column headerText="Opções" footerText="Opções" style="width:110px;">
+					<p:commandButton icon="ui-icon-trash" title="Excluir questionário"
+						actionListener="#{questionarioBean.excluir}"
+						update=":mensagem :formListagem:tabela">
+						<p:confirm header="Confirmação" message="Deseja excluir o questionário?" 
+							icon="ui-icon-alert"/>
+						<f:attribute name="questionarioSelecionado" value="#{questionario}" />
+					</p:commandButton>
+					<p:commandButton icon="ui-icon-pencil" title="Alterar questionário"
+						actionListener="#{questionarioBean.editar}" 
+						update=":mensagem :formCadastro:painel"
+						oncomplete="PF('dialogo').show();">
+						<f:attribute name="questionarioSelecionado" value="#{questionario}" />
+						<f:actionListener type="org.omnifaces.eventlistener.ResetInputAjaxActionListener" />
+					</p:commandButton>
+					<p:commandButton icon="ui-icon-contact" title="Gera Relatório do Questionário" />
+				</p:column>
+			</p:dataTable>
+
+			<p:confirmDialog global="true">
+				<p:commandButton value="Sim" type="button" 
+					styleClass="ui-confirmdialog-yes" icon="ui-icon-check" />
+				<p:commandButton value="Não" type="button" 
+					styleClass="ui-confirmdialog-no" icon="ui-icon-close" />
+			</p:confirmDialog>
+		</p:panel>
+	</h:form>
+	
+	<p:dialog header="Cadastro de Questionário" widgetVar="dialogo" 
+		draggable="false" resizable="false" modal="true" closable="false">
+		<h:form id="formCadastro">
+			<h:panelGrid id="painel" columns="2">
+						
+				<p:outputLabel for="funcionario" value="Funcionário:" />
+				<p:selectOneMenu id="funcionario" filter="true" filterMatchMode="contains"
+					value="#{questionarioBean.questionario.usuario}"
+					converter="omnifaces.SelectItemsConverter" required="true"
+					requiredMessage="O campo 'Funcionário' é obrigatório!!">
+					<f:selectItem noSelectionOption="true" itemLabel="Selecione um Funcionário" />
+					<f:selectItems value="#{questionarioBean.usuarios}" var="usuario"
+						itemValue="#{usuario}" itemLabel="#{usuario.nome}" />
+				</p:selectOneMenu>
+
+				<p:outputLabel for="aluno" value="Aluno:" />
+				<p:selectOneMenu id="aluno" filter="true" filterMatchMode="contains"
+					converter="omnifaces.SelectItemsConverter"
+					value="#{questionarioBean.questionario.aluno}" required="true"
+					requiredMessage="O campo 'Aluno' é obrigatório!!">
+					<f:selectItem noSelectionOption="true" itemLabel="Selecione um Aluno" />
+					<f:selectItems value="#{questionarioBean.alunos1}" var="aluno1"
+						itemValue="#{aluno1}" itemLabel="#{aluno1.nome} - #{aluno1.idade} anos" />
+					<p:ajax listener="#{questionarioBean.popular}" update=":formCadastro:resp" />
+				</p:selectOneMenu>
+			
+				<p:outputLabel for="resp" value="Responsável:" />
+				<p:selectOneMenu id="resp" filter="true" filterMatchMode="contains"
+					converter="omnifaces.SelectItemsConverter" 
+					value="#{questionarioBean.questionario.aluno}">
+					<f:selectItem noSelectionOption="true" itemLabel="Responsável" />
+					<f:selectItems value="#{questionarioBean.alunos}" var="aluno"
+						itemValue="#{aluno}" itemLabel="#{aluno.nomeResp}" />
+				</p:selectOneMenu>
+			
+				<p:outputLabel for="dtQuest" value="Data do Questionário:" />
+				<p:calendar id="dtQuest" size="10"
+					value="#{questionarioBean.questionario.dtQuestion}" required="true"
+					requiredMessage="O campo 'Data do Questionário' é obrigatório!!" 
+					locale="pt_BR" mindate="01/01/2000" maxdate="#{now}" pattern="dd/MM/yyyy">
+					<f:convertDateTime type="date" pattern="dd/MM/yyyy" locale="pt_BR" timeZone="America/Sao_Paulo"/>					
+				</p:calendar>
+						
+			</h:panelGrid>
+			
+			<h:panelGrid columns="2" styleClass="botoesCentralizar">
+				<p:commandButton value="Iniciar" style="horizontal-align:center" actionListener="#{questionarioBean.salvar}"
+					update=":mensagem :formCadastro:painel :formListagem:tabela"
+					oncomplete="PF('quest1').show(); PF('dialogo').hide();" 
+					icon="ui-icon-play" title="Inicia o questionário"/>
+				<p:commandButton value="Cancelar" oncomplete="PF('dialogo').hide();" 
+					icon="ui-icon-close" title="Cancela o questionário"/>
+			</h:panelGrid>
+		</h:form>
+	</p:dialog>
+
+	<p:dialog header="Questionário (1): Atividades" widgetVar="quest1"
+		draggable="false" resizable="false" modal="true" closable="false">
+		<h:form id="formCadAtividades">
+			<h:panelGrid id="painel" columns="1">
+
+				<p:fieldset legend="Atividades Físicas" toggleable="true" toggleSpeed="500">	
+					<p:fieldset legend="Realiza alguma atividade física?"><p:outputLabel for="q1" value="" />
+					<p:selectOneRadio id="q1" value="#{atividadesBean.atividade.realizaAtivFis}">
+						<f:selectItem itemValue="1" itemLabel="Sim" />
+						<f:selectItem itemValue="0" itemLabel="Não" />
+					</p:selectOneRadio>
+				
+					<p:outputLabel for="q2" value="Quais atividades físicas?:" />
+					<p:inputText id="q2" maxlength="200" size="40" 
+						value="#{atividadesBean.atividade.realizaAtivFicOpc}" /></p:fieldset>
+				</p:fieldset>
+				
+				<p:fieldset legend="Atividades no Trabalho" toggleable="true" toggleSpeed="500">
+					<p:fieldset legend="Número de horas de trabalho semanal:"><p:outputLabel for="q3" value="" />
+					<p:selectOneRadio id="q3" value="#{atividadesBean.atividade.hrsTrabSemanal}">
+						<f:selectItem itemValue="0" itemLabel="Nenhuma" />
+						<f:selectItem itemValue="1" itemLabel="Menos de 20" />
+						<f:selectItem itemValue="2" itemLabel="20 a 40" />
+						<f:selectItem itemValue="3" itemLabel="41 a 60" />
+						<f:selectItem itemValue="4" itemLabel="Mais de 60" />
+					</p:selectOneRadio></p:fieldset>
+				
+					<!-- <p:fieldset legend="Atividades desempenhas no trabalho:">
+						<p:selectBooleanCheckbox value="#{atividadesBean.atividade.ativTrabSentar}"/>
+						<p:outputLabel value="Sentar na cadeira"/>
+						<p:selectBooleanCheckbox value="#{atividadesBean.atividade.ativTrabCaminhar}"/>
+						<p:outputLabel value="Caminhar"/>
+						<p:selectBooleanCheckbox value="#{atividadesBean.atividade.ativTrabPeso}"/>
+						<p:outputLabel value="Levantar ou Carregar peso"/>
+						<p:selectBooleanCheckbox value="#{atividadesBean.atividade.ativTrabDirigir}"/>
+						<p:outputLabel value="Dirigir"/>
+						<p:selectBooleanCheckbox value="#{atividadesBean.atividade.ativTrabEmPe}"/>
+						<p:outputLabel value="Trabalhar em pé"/>
+						<p:selectBooleanCheckbox value="#{atividadesBean.atividade.ativTrabOutros}"/>
+						<p:outputLabel value="Outras"/>
+
+					<p:outputLabel for="q5" value="Outras opções: " />
+						<p:inputText id="q5" maxlength="150" size="40" 
+							value="#{atividadesBean.atividade.ativTrabObs}"/></p:fieldset> -->
+				
+					<p:fieldset legend="Atividades desempenhadas no trabalho:"><p:outputLabel for="q4" value="" />
+						<p:selectManyCheckbox id="q4" layout="grid" columns="3">
+							<f:selectItem itemValue="1" itemLabel=" Sentar na cadeira" 
+								value="#{atividadesBean.atividade.ativTrabSentar}"/>
+							<f:selectItem itemValue="2" itemLabel="Caminhar" 
+								value="#{atividadesBean.atividade.ativTrabCaminhar}"/>
+							<f:selectItem itemValue="3" itemLabel="Levantar ou Carregar peso" 
+								value="#{atividadesBean.atividade.ativTrabPeso}"/>
+							<f:selectItem itemValue="4" itemLabel="Dirigir" 
+								value="#{atividadesBean.atividade.ativTrabDirigir}"/>
+							<f:selectItem itemValue="5" itemLabel="Ficar de pé" 
+								value="#{atividadesBean.atividade.ativTrabEmPe}"/>
+							<f:selectItem itemValue="6" itemLabel="Outros:" 
+								value="#{atividadesBean.atividade.ativTrabOutros}"/>
+						</p:selectManyCheckbox>
+					
+					<p:outputLabel for="q5" value="Outras opções: " />
+						<p:inputText id="q5" maxlength="150" size="40" 
+							value="#{atividadesBean.atividade.ativTrabObs}"/></p:fieldset>
+				</p:fieldset>
+			</h:panelGrid>
+			
+			<h:panelGrid columns="3" styleClass="botoesCentralizar">
+				<p:commandButton value="Salvar" actionListener="#{atividadesBean.salvar}"
+					update=":mensagem :formCadAtividades:painel" 
+					icon="ui-icon-disk" title="Salva/Atualiza as atividades"/>
+				<p:commandButton value="Cancelar" oncomplete="PF('quest1').hide();" 
+					icon="ui-icon-close" title="Fecha a tela das atividades"/>
+				<p:commandButton value="Próximo" oncomplete="PF('quest2').show(); PF('quest1').hide();" 
+					icon="ui-icon-arrowthick-1-e" title="Próxima tela"/>
+			</h:panelGrid>
+		</h:form>	
+	</p:dialog>
+	
+	<p:dialog header="Questionário (2): Exames" widgetVar="quest2"
+		draggable="false" resizable="false" modal="true" closable="false" >
+		<h:form id="formCadExames">
+		
+			<h:panelGroup id="painel" layout="block" style="height:550px;width:600px;overflow-y:scroll" >
+
+				<p:fieldset legend="Sobre os Exames" toggleable="true" toggleSpeed="500">
+					<p:outputLabel for="q6" value="Data do último exame físico ou médico:"/>
+					<div>
+					<p:calendar id="q6" size="10"
+						value="#{examesBean.exame.dtUltimExamFisMed}"  
+						locale="pt_BR" mindate="01/01/2000" maxdate="#{now}" pattern="dd/MM/yyyy">
+						<f:convertDateTime type="date" pattern="dd/MM/yyyy" locale="pt_BR" timeZone="America/Sao_Paulo"/>
+					</p:calendar>
+					</div>
+				
+					<p:outputLabel for="q7" value="Seu médico recomendou a praticar atividades físicas
+						somente por meio de prescrições médicas?"/>
+					<p:selectOneRadio id="q7" value="#{examesBean.exame.prescricaoMed}">
+						<f:selectItem itemValue="1" itemLabel="Sim" />
+						<f:selectItem itemValue="0" itemLabel="Não" />
+					</p:selectOneRadio>
+				</p:fieldset>
+
+				<p:fieldset legend="Medicamentos" toggleable="true" toggleSpeed="500">
+					<p:outputLabel for="q8" value="Descreva os últimos medicamentos que você tem tomado:" />
+					<p:inputText id="q8" maxlength="150" size="40" 
+						value="#{examesBean.exame.medicamentos}"/>
+				</p:fieldset>
+					
+				<p:fieldset legend="Cardiopatia" toggleable="true" toggleSpeed="500">
+					<p:outputLabel value="Algum de seus familiares abaixo 
+						teve cardiopatia antes dos 50 anos?" />
+					<p:outputLabel for="q9" value="Pai:" />
+					<p:selectOneRadio id="q9" value="#{examesBean.exame.cardiopatiaPai}">
+						<f:selectItem itemValue="1" itemLabel="Sim" />
+						<f:selectItem itemValue="0" itemLabel="Não" />
+					</p:selectOneRadio>
+					<p:outputLabel for="q10" value="Mãe:" />
+					<p:selectOneRadio id="q10" value="#{examesBean.exame.cardiopatiaMae}">
+						<f:selectItem itemValue="1" itemLabel="Sim" />
+						<f:selectItem itemValue="0" itemLabel="Não" />
+					</p:selectOneRadio>
+					<p:outputLabel for="q11" value="Irmão(ã):" />
+					<p:selectOneRadio id="q11" value="#{examesBean.exame.cardiopatiaIrmao}">
+						<f:selectItem itemValue="1" itemLabel="Sim" />
+						<f:selectItem itemValue="0" itemLabel="Não" />
+					</p:selectOneRadio>
+					<p:outputLabel for="q12" value="Avô/Avó:" />
+					<p:selectOneRadio id="q12" value="#{examesBean.exame.cardiopatiaAvo}">
+						<f:selectItem itemValue="1" itemLabel="Sim" />
+						<f:selectItem itemValue="0" itemLabel="Não" />
+					</p:selectOneRadio>
+				</p:fieldset>
+				
+				<p:fieldset legend="Alergias" toggleable="true" toggleSpeed="500">
+					<p:outputLabel for="q13" value="Possui alguma alergia?"/>
+					<p:selectOneRadio id="q13" value="#{examesBean.exame.alergia}">
+						<f:selectItem itemValue="1" itemLabel="Sim" />
+						<f:selectItem itemValue="0" itemLabel="Não" />
+					</p:selectOneRadio>
+				
+					<p:outputLabel for="q14" value="Qual(is)?"/>
+					<p:inputText id="q14" maxlength="30" size="30" 
+						value="#{examesBean.exame.alergiaOpc}"/>
+				</p:fieldset>
+				
+				<p:fieldset legend="Lesões" toggleable="true" toggleSpeed="500">
+					<p:outputLabel for="q15" value="Sofreu algum acidente ou lesão ósteo-articular?"/>
+					<p:selectOneRadio id="q15" value="#{examesBean.exame.lesao}">
+						<f:selectItem itemValue="1" itemLabel="Sim" />
+						<f:selectItem itemValue="0" itemLabel="Não" />
+					</p:selectOneRadio>
+				
+					<p:outputLabel for="q16" value="Qual(is)?"/>
+					<p:inputText id="q16" maxlength="30" size="30" 
+						value="#{examesBean.exame.lesaoOpc}"/>
+				</p:fieldset>
+
+				<p:fieldset legend="Restrições" toggleable="true" toggleSpeed="500">
+					<p:outputLabel for="q17" value="Possui alguma restrição à prática de atividade física?"/>
+					<p:selectOneRadio id="q17" value="#{examesBean.exame.restricao}">
+						<f:selectItem itemValue="1" itemLabel="Sim" />
+						<f:selectItem itemValue="0" itemLabel="Não" />
+					</p:selectOneRadio>
+
+					<p:outputLabel for="q18" value="Qual(is)?"/>
+					<p:inputText id="q18" maxlength="30" size="30" 
+						value="#{examesBean.exame.restricaoOpc}"/>
+				</p:fieldset>
+				
+				<p:fieldset legend="Cigarro" toggleable="true" toggleSpeed="500">
+					<p:outputLabel for="q19" value="Você é fumante?"/>
+					<p:selectOneRadio id="q19" value="#{examesBean.exame.fumante}">
+						<f:selectItem itemValue="1" itemLabel="Sim" />
+						<f:selectItem itemValue="0" itemLabel="Não" />
+					</p:selectOneRadio>
+
+					<p:outputLabel for="q20" value="Quantos cigarros por dia?"/>
+					<p:inputText id="q20" maxlength="2" size="2" 
+						value="#{examesBean.exame.qtddCigarros}"/>
+				</p:fieldset>
+				
+				<p:fieldset legend="Observações" toggleable="true" toggleSpeed="500">
+					<p:outputLabel for="q21" value="Observação:"/>
+					<p:inputText id="q21" maxlength="200" size="40" 
+						value="#{examesBean.exame.observacao}"/>
+				</p:fieldset>
+					
+			</h:panelGroup>
+			
+			<h:panelGrid columns="4" styleClass="botoesCentralizar">
+				<p:commandButton value="Voltar" oncomplete="PF('quest1').show(); PF('quest2').hide();" 
+					icon="ui-icon-arrowthick-1-w" title="Tela anterior"/>
+				<p:commandButton value="Salvar" actionListener="#{examesBean.salvar}"
+					update=":mensagem :formCadExames:painel" 
+					icon="ui-icon-disk" title="Salva/Atualiza os exames"/>
+				<p:commandButton value="Cancelar" oncomplete="PF('quest2').hide();" 
+					icon="ui-icon-close" title="Fecha a tela dos exames"/>
+				<p:commandButton value="Próximo" oncomplete="PF('quest3').show(); PF('quest2').hide();" 
+					icon="ui-icon-arrowthick-1-e" title="Próxima tela"/>
+			</h:panelGrid>
+		</h:form>	
+	</p:dialog>
+	
+	<p:dialog header="Questionário (3): Diagnósticos" widgetVar="quest3"
+		draggable="false" resizable="false" modal="true" closable="false">
+		<h:form id="formCadDiagnosticos">
+			<h:panelGrid id="painel" columns="1">
+				
+				<p:fieldset legend="Diagnósticos em geral" toggleable="true" toggleSpeed="500">
+					<p:outputLabel for="q22" value="Marque o(s) problema(s) abaixo que tenha sido diagnosticado(a)
+						ou tratado(a) por um médico:" />
+					<p:fieldset><p:selectManyCheckbox id="q22" layout="grid" columns="3">
+						<f:selectItem itemValue="1" itemLabel="Alcoolismo" 
+							value="#{diagnosticosBean.diagnostico.alcool}"/>
+						<f:selectItem itemValue="2" itemLabel="Artrite" 
+							value="#{diagnosticosBean.diagnostico.artrite}"/>
+						<f:selectItem itemValue="3" itemLabel="Diabetes" 
+							value="#{diagnosticosBean.diagnostico.diabetes}"/>
+						<f:selectItem itemValue="4" itemLabel="Problema Muscular"
+							value="#{diagnosticosBean.diagnostico.probMuscular}"/>
+						<f:selectItem itemValue="5" itemLabel="Problema Renal"
+							value="#{diagnosticosBean.diagnostico.probRenal}"/>
+						<f:selectItem itemValue="6" itemLabel="Problema Ocular"
+							value="#{diagnosticosBean.diagnostico.probOcular}"/>
+						<f:selectItem itemValue="7" itemLabel="Problema Ósseo"
+							value="#{diagnosticosBean.diagnostico.probOsseo}"/>
+						<f:selectItem itemValue="8" itemLabel="Pressão Alta"
+							value="#{diagnosticosBean.diagnostico.pressaoAlta}"/>
+						<f:selectItem itemValue="9" itemLabel="Enfisema"
+							value="#{diagnosticosBean.diagnostico.enfisema}"/>
+						<f:selectItem itemValue="10" itemLabel="Úlcera"
+							value="#{diagnosticosBean.diagnostico.ulcera}"/>
+						<f:selectItem itemValue="11" itemLabel="AVC"
+							value="#{diagnosticosBean.diagnostico.avc}"/>
+						<f:selectItem itemValue="12" itemLabel="Anemia"
+							value="#{diagnosticosBean.diagnostico.anemia}"/>
+						<f:selectItem itemValue="13" itemLabel="Asma"
+							value="#{diagnosticosBean.diagnostico.asma}"/>
+						<f:selectItem itemValue="14" itemLabel="Obesidade"
+							value="#{diagnosticosBean.diagnostico.obesidade}"/>
+						<f:selectItem itemValue="15" itemLabel="Outros"
+							value="#{diagnosticosBean.diagnostico.outros}"/>
+					</p:selectManyCheckbox>
+					<p:outputLabel for="q23" value="Outros: " />
+						<p:inputText id="q23" maxlength="60" size="40" 
+							value="#{diagnosticosBean.diagnostico.opcOutros}"/></p:fieldset>
+				</p:fieldset>
+					
+			</h:panelGrid>
+			
+			<h:panelGrid columns="4" styleClass="botoesCentralizar">
+				<p:commandButton value="Voltar" oncomplete="PF('quest2').show(); PF('quest3').hide();" 
+					icon="ui-icon-arrowthick-1-w" title="Tela anterior"/>
+				<p:commandButton value="Salvar" actionListener="#{diagnosticosBean.salvar}" 
+					update=":mensagem :formCadDiagnosticos:painel" 
+					icon="ui-icon-disk" title="Salva/Atualiza os diagnósticos"/>
+				<p:commandButton value="Cancelar" oncomplete="PF('quest3').hide();" 
+					icon="ui-icon-close" title="Fecha a tela dos diagnósticos"/>
+				<p:commandButton value="Próximo" oncomplete="PF('quest4').show(); PF('quest3').hide();" 
+					icon="ui-icon-arrowthick-1-e" title="Próxima tela"/>
+			</h:panelGrid>
+		</h:form>	
+	</p:dialog>
+	
+	<p:dialog header="Questionário (4): Sintomas" widgetVar="quest4"
+		draggable="false" resizable="false" modal="true" closable="false">
+		<h:form id="formCadSintomas">
+			<h:panelGroup id="painel" layout="block" style="height:550px;width:600px;overflow-y:scroll"> 
+				
+				<p:fieldset legend="Sintomas em geral" toggleable="true" toggleSpeed="500">
+					<p:outputLabel value="Indique os sintomas abaixo:" /><br/>
+					<p:fieldset><p:outputLabel for="q24" value="Tosse com Sangue:"/>
+					<p:selectOneRadio id="q24" value="#{sintomasBean.sintoma.tosseSangue}">
+						<f:selectItem itemValue="2" itemLabel="Sempre" />
+						<f:selectItem itemValue="1" itemLabel="Algumas Vezes" />
+						<f:selectItem itemValue="0" itemLabel="Nunca" />
+					</p:selectOneRadio></p:fieldset>
+					<p:fieldset><p:outputLabel for="q25" value="Dor no Tórax com Atividades Físicas:"/>
+					<p:selectOneRadio id="q25" value="#{sintomasBean.sintoma.dorToraxComAtivFis}">
+						<f:selectItem itemValue="2" itemLabel="Sempre" />
+						<f:selectItem itemValue="1" itemLabel="Algumas Vezes" />
+						<f:selectItem itemValue="0" itemLabel="Nunca" />
+					</p:selectOneRadio></p:fieldset>
+					<p:fieldset><p:outputLabel for="q26" value="Dor no Tórax sem Atividades Físicas:"/>
+					<p:selectOneRadio id="q26" value="#{sintomasBean.sintoma.dorToraxSemAtivFis}">
+						<f:selectItem itemValue="2" itemLabel="Sempre" />
+						<f:selectItem itemValue="1" itemLabel="Algumas Vezes" />
+						<f:selectItem itemValue="0" itemLabel="Nunca" />
+					</p:selectOneRadio></p:fieldset>
+					<p:fieldset><p:outputLabel for="q27" value="Dor Abnominal:"/>
+					<p:selectOneRadio id="q27" value="#{sintomasBean.sintoma.dorAbdmn}">
+						<f:selectItem itemValue="2" itemLabel="Sempre" />
+						<f:selectItem itemValue="1" itemLabel="Algumas Vezes" />
+						<f:selectItem itemValue="0" itemLabel="Nunca" />
+					</p:selectOneRadio></p:fieldset>
+					<p:fieldset><p:outputLabel for="q28" value="Dor nas Pernas:"/>
+					<p:selectOneRadio id="q28" value="#{sintomasBean.sintoma.dorPernas}">
+						<f:selectItem itemValue="2" itemLabel="Sempre" />
+						<f:selectItem itemValue="1" itemLabel="Algumas Vezes" />
+						<f:selectItem itemValue="0" itemLabel="Nunca" />
+					</p:selectOneRadio></p:fieldset>
+					<p:fieldset><p:outputLabel for="q29" value="Dor nos Braços:"/>
+					<p:selectOneRadio id="q29" value="#{sintomasBean.sintoma.dorBracos}">
+						<f:selectItem itemValue="2" itemLabel="Sempre" />
+						<f:selectItem itemValue="1" itemLabel="Algumas Vezes" />
+						<f:selectItem itemValue="0" itemLabel="Nunca" />
+					</p:selectOneRadio></p:fieldset>
+					<p:fieldset><p:outputLabel for="q30" value="Dor nas Costas:"/>
+					<p:selectOneRadio id="q30" value="#{sintomasBean.sintoma.dorCosta}">
+						<f:selectItem itemValue="2" itemLabel="Sempre" />
+						<f:selectItem itemValue="1" itemLabel="Algumas Vezes" />
+						<f:selectItem itemValue="0" itemLabel="Nunca" />
+					</p:selectOneRadio></p:fieldset>
+					<p:fieldset><p:outputLabel for="q31" value="Dor no Pescoço:"/>
+					<p:selectOneRadio id="q31" value="#{sintomasBean.sintoma.dorPescoco}">
+						<f:selectItem itemValue="2" itemLabel="Sempre" />
+						<f:selectItem itemValue="1" itemLabel="Algumas Vezes" />
+						<f:selectItem itemValue="0" itemLabel="Nunca" />
+					</p:selectOneRadio></p:fieldset>
+					<p:fieldset><p:outputLabel for="q32" value="Dor no Peito:"/>
+					<p:selectOneRadio id="q32" value="#{sintomasBean.sintoma.dorPeito}">
+						<f:selectItem itemValue="2" itemLabel="Sempre" />
+						<f:selectItem itemValue="1" itemLabel="Algumas Vezes" />
+						<f:selectItem itemValue="0" itemLabel="Nunca" />
+					</p:selectOneRadio></p:fieldset>
+					<p:fieldset><p:outputLabel for="q33" value="Dores Articulares:"/>
+					<p:selectOneRadio id="q33" value="#{sintomasBean.sintoma.dorArticular}">
+						<f:selectItem itemValue="2" itemLabel="Sempre" />
+						<f:selectItem itemValue="1" itemLabel="Algumas Vezes" />
+						<f:selectItem itemValue="0" itemLabel="Nunca" />
+					</p:selectOneRadio></p:fieldset>
+					<p:fieldset><p:outputLabel for="q34" value="Falta de Ar com Esforço Leve:"/>
+					<p:selectOneRadio id="q34" value="#{sintomasBean.sintoma.faltaDeAr}">
+						<f:selectItem itemValue="2" itemLabel="Sempre" />
+						<f:selectItem itemValue="1" itemLabel="Algumas Vezes" />
+						<f:selectItem itemValue="0" itemLabel="Nunca" />
+					</p:selectOneRadio></p:fieldset>
+					<p:fieldset><p:outputLabel for="q35" value="Fraqueza:"/>
+					<p:selectOneRadio id="q35" value="#{sintomasBean.sintoma.fraqueza}">
+						<f:selectItem itemValue="2" itemLabel="Sempre" />
+						<f:selectItem itemValue="1" itemLabel="Algumas Vezes" />
+						<f:selectItem itemValue="0" itemLabel="Nunca" />
+					</p:selectOneRadio></p:fieldset>
+					<p:fieldset><p:outputLabel for="q36" value="Tontura:"/>
+					<p:selectOneRadio id="q36" value="#{sintomasBean.sintoma.tontura}">
+						<f:selectItem itemValue="2" itemLabel="Sempre" />
+						<f:selectItem itemValue="1" itemLabel="Algumas Vezes" />
+						<f:selectItem itemValue="0" itemLabel="Nunca" />
+					</p:selectOneRadio></p:fieldset>
+					<p:fieldset><p:outputLabel for="q37" value="Batimento cardíaco acelerado:"/>
+					<p:selectOneRadio id="q37" value="#{sintomasBean.sintoma.batCardAcelerado}">
+						<f:selectItem itemValue="2" itemLabel="Sempre" />
+						<f:selectItem itemValue="1" itemLabel="Algumas Vezes" />
+						<f:selectItem itemValue="0" itemLabel="Nunca" />
+					</p:selectOneRadio></p:fieldset>
+				</p:fieldset>
+				
+			</h:panelGroup>
+			
+			<h:panelGrid columns="4" styleClass="botoesCentralizar">
+				<p:commandButton value="Voltar" oncomplete="PF('quest3').show(); PF('quest4').hide();" 
+					icon="ui-icon-arrowthick-1-w" title="Tela anterior"/>
+				<p:commandButton value="Salvar" actionListener="#{sintomasBean.salvar}" 
+					update=":mensagem :formCadSintomas:painel" 
+					icon="ui-icon-disk" title="Salva/Atualiza os sintomas"/>
+				<p:commandButton value="Cancelar" oncomplete="PF('quest4').hide();" 
+					icon="ui-icon-close" title="Fecha a tela dos sintomas"/>
+				<p:commandButton value="Próximo" oncomplete="PF('quest5').show(); PF('quest4').hide();" 
+					icon="ui-icon-arrowthick-1-e" title="Próxima tela"/>
+			</h:panelGrid>
+		</h:form>	
+	</p:dialog>
+
+	<p:dialog header="Questionário (5): Cirurgias" widgetVar="quest5"
+		draggable="false" resizable="false" modal="true" closable="false">
+		<h:form id="formCadCirurgias">
+			<h:panelGrid id="painel" columns="1">
+
+				<p:fieldset legend="Cirurgias em geral" toggleable="true" toggleSpeed="500">
+					<p:outputLabel for="q38" value="Marque as intervenções cirúrgicas que você tenha feito:" />
+					<p:fieldset><p:selectManyCheckbox id="q38" layout="grid" columns="2">
+						<f:selectItem itemValue="1" itemLabel="Coluna" value="#{cirurgiasBean.cirurgia.coluna}"/>
+						<f:selectItem itemValue="2" itemLabel="Rim" value="#{cirurgiasBean.cirurgia.rim}"/>
+						<f:selectItem itemValue="3" itemLabel="Coração" value="#{cirurgiasBean.cirurgia.coracao}"/>
+						<f:selectItem itemValue="4" itemLabel="Pulmão" value="#{cirurgiasBean.cirurgia.pulmao}"/>
+						<f:selectItem itemValue="5" itemLabel="Articulação" value="#{cirurgiasBean.cirurgia.articulacao}"/>
+						<f:selectItem itemValue="6" itemLabel="Olhos" value="#{cirurgiasBean.cirurgia.olhos}"/>
+						<f:selectItem itemValue="7" itemLabel="Hérnia" value="#{cirurgiasBean.cirurgia.hernia}"/>
+						<f:selectItem itemValue="8" itemLabel="Outra:" value="#{cirurgiasBean.cirurgia.outra}"/>
+					</p:selectManyCheckbox>
+				
+					<p:outputLabel for="q39" value="Outras: " />
+						<p:inputText id="q39" maxlength="20" size="20" 
+							value="#{cirurgiasBean.cirurgia.opcOutra}"/></p:fieldset>
+				</p:fieldset>
+				
+			</h:panelGrid>
+			
+			<h:panelGrid columns="4" styleClass="botoesCentralizar">
+				<p:commandButton value="Voltar" oncomplete="PF('quest4').show(); PF('quest5').hide();" 
+					icon="ui-icon-arrowthick-1-w" title="Tela anterior"/>
+				<p:commandButton value="Salvar" actionListener="#{cirurgiasBean.salvar}"
+					update=":mensagem :formCadCirurgias:painel"
+					icon="ui-icon-disk" title="Salva/Atualiza as cirurgias"/>
+				<p:commandButton value="Cancelar" oncomplete="PF('quest5').hide();" 
+					icon="ui-icon-close" title="Fecha a tela das cirurgias"/>
+				<p:commandButton value="Próximo" oncomplete="PF('quest6').show(); PF('quest5').hide();" 
+					icon="ui-icon-arrowthick-1-e" title="Próxima tela"/>
+			</h:panelGrid>
+		</h:form>	
+	</p:dialog>
+
+	<p:dialog header="Questionário (6): Objetivos" widgetVar="quest6"
+		draggable="false" resizable="false" modal="true" closable="false">
+		<h:form id="formCadObjetivos">
+			<h:panelGrid id="painel" columns="1">
+
+				<p:fieldset legend="Principais objetivos" toggleable="true" toggleSpeed="500">			
+					<p:outputLabel for="q40" value="Objetivos com Relação à Atividade Física:" />
+					<p:fieldset><p:selectManyCheckbox id="q40" layout="grid" columns="2">
+						<f:selectItem itemValue="1" itemLabel="Estética" value="#{objetivosBean.objetivo.estetica}"/>
+						<f:selectItem itemValue="2" itemLabel="Convívio Social" value="#{objetivosBean.objetivo.convivioSocial}"/>
+						<f:selectItem itemValue="3" itemLabel="Lazer" value="#{objetivosBean.objetivo.lazer}"/>
+						<f:selectItem itemValue="4" itemLabel="Emagrecimento" value="#{objetivosBean.objetivo.emagrecimento}"/>
+						<f:selectItem itemValue="5" itemLabel="Terapêutico" value="#{objetivosBean.objetivo.terapeutico}"/>
+						<f:selectItem itemValue="6" itemLabel="Condicionamento Físico" value="#{objetivosBean.objetivo.condicioFisico}"/>
+						<f:selectItem itemValue="7" itemLabel="Outros:" value="#{objetivosBean.objetivo.outros}"/>
+					</p:selectManyCheckbox>
+					<p:outputLabel for="q41" value="Outros: " />
+						<p:inputText id="q41" maxlength="35" size="35" 
+							value="#{objetivosBean.objetivo.opcOutros}"/></p:fieldset>
+				</p:fieldset>
+				
+			</h:panelGrid>
+
+			<h:panelGrid columns="3" styleClass="botoesCentralizar">
+				<p:commandButton value="Voltar" oncomplete="PF('quest5').show(); PF('quest6').hide();" 
+					icon="ui-icon-arrowthick-1-w" title="Tela anterior"/>
+				<p:commandButton value="Salvar" actionListener="#{objetivosBean.salvar}"
+					update=":mensagem :formCadObjetivos:painel"
+					icon="ui-icon-disk" title="Salva/Atualiza os objetivos"/>
+				<p:commandButton value="Finalizar" oncomplete="PF('quest6').hide();" 
+					icon="ui-icon-close" title="Finaliza o questionário"/>
+				
+			</h:panelGrid>
+		</h:form>	
+	</p:dialog>
+</ui:define>
+</ui:composition>

@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://xmlns.jcp.org/jsf/html"
+	xmlns:f="http://xmlns.jcp.org/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
+<h:head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<title>SGAF</title>
+	<h:outputScript library="js" name="scripts.js" />
+	<h:outputStylesheet library="css" name="estilos.css"/>
+	<h:outputStylesheet library="css" name="table.css" />
+</h:head>
+<h:body>
+	<p:growl id="mensagem" life="1500" />
+	
+		<div id="geral">
+			<div id="topo">
+				<p:graphicImage library="images" name="sgafbanner.png"
+					styleClass="imagemCentralizada" />
+			</div>
+		
+			<div id="cabecalho" class="divCabecalho">
+			<h:form id="formMenu">
+				<p:menubar id="menu" styleClass="menu">
+					<p:submenu label="Arquivo" styleClass="submenu">
+						<p:menuitem value="Sair" url="http://www.google.com.br"/>
+					</p:submenu>
+					
+					<p:submenu label="Cadastros" styleClass="submenu">
+						<p:submenu label="de Pessoas">
+							<p:menuitem value="Usuários" url="/pages/usuarios.xhtml"/>
+							<p:menuitem value="Alunos" url="/pages/alunos.xhtml"/>
+						</p:submenu>
+						<p:submenu label="Necessários">
+							<p:menuitem value="Empresa" url="/pages/empresa.xhtml"/>
+							<p:menuitem value="Aparelhos" url="/pages/aparelhos.xhtml"/>
+							<p:menuitem value="Grupos Musculares" url="/pages/gruposMusculares.xhtml"/>
+							<p:menuitem value="Exercícios" url="/pages/exercicios.xhtml"/>
+						</p:submenu>
+						<p:submenu label="de Rotina">
+							<p:menuitem value="Avaliações Físicas" url="/pages/avaliacoesFisicas.xhtml"/>		
+							<p:menuitem value="Frequências" url="/pages/frequencias.xhtml"/>
+							<p:menuitem value="Treinos" url="/pages/treinos.xhtml"/>
+							<p:menuitem value="Questionários" url="/pages/questionarios.xhtml"/>
+						</p:submenu>
+					</p:submenu>
+					
+					<p:submenu label="Ajuda" styleClass="submenu">
+						<p:submenu label="Desenvolvedores">
+							<p:menuitem value="Anderson Morais" url="https://www.facebook.com/andersonmorais08"/>
+							<p:menuitem value="André Duarte" url="https://www.facebook.com/djandreduarte"/>
+							<p:menuitem value="Clóvis Lázaro Júnior" url="https://www.facebook.com/clazarojunior"/>
+							<p:menuitem value="Kevin Bueno" url="https://www.facebook.com/kkrawford"/>
+							<p:menuitem value="Roberto Bueno" url="https://www.facebook.com/roberto.bueno.96"/>
+						</p:submenu>
+						<p:menuitem value="PrimeFaces" url="http://www.primefaces.org/"/>
+					</p:submenu>
+				</p:menubar>
+				</h:form>
+			</div>
+		
+			<div id="conteudo" class="divConteudo">
+				<ui:insert name="conteudo"/>
+			</div>
+		
+			<div id="rodape">
+			</div>
+		</div>
+</h:body>
+</html>

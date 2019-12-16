@@ -1,0 +1,224 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://xmlns.jcp.org/jsf/html"
+	xmlns:f="http://xmlns.jcp.org/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+	template="/templates/modelo.xhtml">
+	
+<ui:define name="conteudo">
+	<h:form id="formListagem">
+		<p:panel header="Listagem de Treinos">
+			
+			<p:dataTable id="tabela" emptyMessage="Nenhum registro encontrado." style="text-align:center;"
+				paginator="true" value="#{treinoBean.treinos}" var="treino" rows="10"
+				scrollable="true" scrollWidth="97%" scrollHeight="230" paginatorPosition="top"
+				paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} 
+				{NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+					rowsPerPageTemplate="5,10,15"
+					currentPageReportTemplate="{currentPage} de {totalPages}">
+				<f:facet name="header">
+					<p:commandButton id="toggler" type="button" value="Colunas" style="float:left" icon="ui-icon-calculator" />
+			        <p:columnToggler datasource="tabela" trigger="toggler" />
+					<p:commandButton value="Novo Treino" style="float:right" oncomplete="PF('dialogo').show();" 
+						actionListener="#{treinoBean.novo}"
+						update=":mensagem :formCadastro:painel">
+						<f:actionListener type="org.omnifaces.eventlistener.ResetInputAjaxActionListener" />
+					</p:commandButton>
+				</f:facet>
+
+				<p:column headerText="Professor" footerText="Professor" sortBy="#{treino.usuario.nome}" 
+					filterBy="#{treino.usuario.nome}" filterMatchMode="contains"
+					style="width:200px;" filterStyle="width:150px;" filterMaxLength="60">
+					<h:outputText value="#{treino.usuario.nome}" />
+				</p:column>
+				<p:column headerText="Aluno" footerText="Aluno" sortBy="#{treino.aluno.nome}" 
+					filterBy="#{treino.aluno.nome}" filterMatchMode="contains"
+					style="width:200px;" filterStyle="width:150px;" filterMaxLength="60">
+					<h:outputText value="#{treino.aluno.nome}" />
+				</p:column>
+				<p:column headerText="Data da Avaliação Física" footerText="Data da Avaliação Física" sortBy="#{treino.af.dtAvaFisica}" 
+					filterBy="#{treino.af.dtAvaFisica}" filterMatchMode="contains"
+					style="width:110px;" filterStyle="width:70px;" filterMaxLength="10">
+					<h:outputText value="#{treino.af.dtAvaFisica}">
+						<f:convertDateTime locale="pt_BR"/>
+					</h:outputText>
+				</p:column>
+				<p:column headerText="Grupo Muscular" footerText="Grupo Muscular" sortBy="#{treino.gm.nomeGM}" 
+					filterBy="#{treino.gm.nomeGM}" filterMatchMode="contains"
+					style="width:110px;" filterStyle="width:80px;" filterMaxLength="25">
+					<h:outputText value="#{treino.gm.nomeGM}" />
+				</p:column>
+				<p:column headerText="Exercício" footerText="Exercício" sortBy="#{treino.exercicio.nomeExerc}" 
+					filterBy="#{treino.exercicio.nomeExerc}" filterMatchMode="contains"
+					style="width:120px;" filterStyle="width:80px;" filterMaxLength="45">
+					<h:outputText value="#{treino.exercicio.nomeExerc}" />
+				</p:column>
+				<p:column headerText="Aparelho" footerText="Aparelho" sortBy="#{treino.aparelho.nomeApar}" 
+					filterBy="#{treino.aparelho.nomeApar}" filterMatchMode="contains"
+					style="width:120px;" filterStyle="width:80px;" filterMaxLength="50">
+					<h:outputText value="#{treino.aparelho.nomeApar}" />
+				</p:column>
+				<p:column headerText="Dia" footerText="Dia" 
+					filterBy="#{treino.diaTreino}" filterMatchMode="contains"
+					style="width:50px;" filterStyle="width:30px;" filterMaxLength="1">
+					<h:outputText value="#{treino.diaTreino}" />
+				</p:column>
+				
+				<p:column headerText="Opções" footerText="Opções" style="width:90px;">
+					<p:commandButton icon="ui-icon-trash" title="Excluir treino"
+						actionListener="#{treinoBean.excluir}"
+						update=":mensagem :formListagem:tabela">
+						<p:confirm header="Confirmação" message="Deseja excluir o treino?" 
+							icon="ui-icon-alert"/>
+						<f:attribute name="treinoSelecionado" value="#{treino}" />
+					</p:commandButton>
+					<p:commandButton icon="ui-icon-pencil" title="Alterar treino"
+						actionListener="#{treinoBean.editar}" 
+						update=":mensagem :formCadastro:painel"
+						oncomplete="PF('dialogo').show();">
+						<f:attribute name="treinoSelecionado" value="#{treino}" />
+						<f:actionListener type="org.omnifaces.eventlistener.ResetInputAjaxActionListener" />
+					</p:commandButton>
+				</p:column>
+			</p:dataTable>
+			
+			<p:confirmDialog global="true">
+				<p:commandButton value="Sim" type="button" 
+					styleClass="ui-confirmdialog-yes" icon="ui-icon-check" />
+				<p:commandButton value="Não" type="button" 
+					styleClass="ui-confirmdialog-no" icon="ui-icon-close" />
+			</p:confirmDialog>
+		</p:panel>
+	</h:form>
+	
+	<p:dialog header="Cadastro de Treinos" widgetVar="dialogo" 
+		draggable="false" resizable="false" modal="true" closable="false">
+		<h:form id="formCadastro">
+			<h:panelGrid id="painel">
+				
+				<p:fieldset legend="Informações Básicas" toggleable="true" toggleSpeed="500">
+					<h:panelGrid columns="2">
+					<p:outputLabel for="professor" value="Professor:" />
+					<p:selectOneMenu id="professor" filter="true" filterMatchMode="contains"
+						value="#{treinoBean.treino.usuario}"
+						converter="omnifaces.SelectItemsConverter" required="true"
+						requiredMessage="O campo 'Professor' é obrigatório!!">
+						<f:selectItem noSelectionOption="true" itemLabel="Selecione um Professor" />
+						<f:selectItems value="#{treinoBean.usuarios}" var="usuario"
+							itemValue="#{usuario}" itemLabel="#{usuario.nome}" />
+					</p:selectOneMenu>
+	
+					<p:outputLabel for="aluno" value="Aluno:" />
+					<p:selectOneMenu id="aluno" filter="true" filterMatchMode="contains"
+						converter="omnifaces.SelectItemsConverter"
+						value="#{treinoBean.treino.aluno}" required="true"
+						requiredMessage="O campo 'Aluno' é obrigatório!!">
+						<f:selectItem noSelectionOption="true" itemLabel="Selecione um Aluno" />
+						<f:selectItems value="#{treinoBean.alunos}" var="aluno"
+							itemValue="#{aluno}" itemLabel="#{aluno.nome}" />
+						<p:ajax listener="#{treinoBean.popular}" update=":formCadastro:dtAvaFis" />
+					</p:selectOneMenu>
+	
+					<p:outputLabel for="dtAvaFis" value="Data da Avaliação Física:" />
+					<p:selectOneMenu id="dtAvaFis" filter="true" filterMatchMode="contains" required="true"
+						requiredMessage="O campo 'Data da Avaliação Física' é obrigatório!!"
+						converter="omnifaces.SelectItemsConverter" 
+						value="#{treinoBean.treino.af}">
+						<f:selectItem noSelectionOption="true" itemLabel="Selecione uma Avaliação Física" />
+						<f:selectItems value="#{treinoBean.avaliacoesFisicas}" var="avaliacaoFisica"
+							itemValue="#{avaliacaoFisica}" itemLabel="#{avaliacaoFisica.dtAvaFisica}" />
+					</p:selectOneMenu>
+					</h:panelGrid>
+				</p:fieldset>
+				
+				<p:fieldset>
+					<h:panelGrid columns="2">
+					<p:outputLabel for="gpMusc" value="Grupo Muscular:" />
+					<p:selectOneMenu id="gpMusc" filter="true" filterMatchMode="contains"
+						value="#{treinoBean.treino.gm}"
+						converter="omnifaces.SelectItemsConverter" required="true"
+						requiredMessage="O campo 'Grupo Muscular' é obrigatório!!">
+						<f:selectItem noSelectionOption="true" itemLabel="Selecione um Grupo Muscular" />
+						<f:selectItems value="#{treinoBean.gruposMusculares}" var="grupoMuscular"
+							itemValue="#{grupoMuscular}" itemLabel="#{grupoMuscular.nomeGM}" />
+					</p:selectOneMenu>
+					
+					<p:outputLabel for="exercicio" value="Exercício:" />
+					<p:selectOneMenu id="exercicio" filter="true" filterMatchMode="contains"
+						value="#{treinoBean.treino.exercicio}"
+						converter="omnifaces.SelectItemsConverter" required="true"
+						requiredMessage="O campo 'Exercício' é obrigatório!!">
+						<f:selectItem noSelectionOption="true" itemLabel="Selecione um Exercício" />
+						<f:selectItems value="#{treinoBean.exercicios}" var="exercicio"
+							itemValue="#{exercicio}" itemLabel="#{exercicio.nomeExerc}" />
+					</p:selectOneMenu>
+	
+					<p:outputLabel for="aparelho" value="Aparelho:" />
+					<p:selectOneMenu id="aparelho" filter="true" filterMatchMode="contains"
+						value="#{treinoBean.treino.aparelho}"
+						converter="omnifaces.SelectItemsConverter">
+						<f:selectItem noSelectionOption="true" itemLabel="Selecione um Aparelho" />
+						<f:selectItems value="#{treinoBean.aparelhos}" var="aparelho"
+							itemValue="#{aparelho}" itemLabel="#{aparelho.nomeApar}" />
+					</p:selectOneMenu>
+				
+					<p:outputLabel for="carga" value="Carga" />
+					<p:inputText id="carga" maxlength="5" size="5"
+						value="#{treinoBean.treino.carga}" 
+						converterMessage="Informe um valor válido para o campo 'Carga'!!"
+						validatorMessage="Informe um valor entre 0,1 e 500 para o campo 'Carga'!!">
+						<f:validateDoubleRange minimum="0.1" maximum="500" />
+						<f:convertNumber locale="pt_BR" minFractionDigits="1" />
+					</p:inputText>
+					
+					<p:outputLabel for="serie" value="Série" />
+					<p:inputText id="serie" maxlength="1" size="4" 
+						value="#{treinoBean.treino.serie}"
+						converterMessage="Informe um valor válido para o campo 'Série'!!"
+						validatorMessage="Informe um valor entre 1 e 9 para o campo 'Série'!!">
+						<f:validateLongRange minimum="1" maximum="9" />
+					</p:inputText>
+					
+					<p:outputLabel for="repet" value="Repetições" />
+					<p:inputText id="repet" maxlength="3" size="4"
+						value="#{treinoBean.treino.repeticoes}"
+						converterMessage="Informe um valor válido para o campo 'Repetições'!!"
+						validatorMessage="Informe um valor entre 1 e 100 para o campo 'Repetições'!!">
+						<f:validateLongRange minimum="1" maximum="100" />
+					</p:inputText>
+					
+					<p:outputLabel for="desc" value="Descanso (em segundos)" />
+					<p:inputText id="desc" maxlength="3" size="4"
+						value="#{treinoBean.treino.descanso}"
+						converterMessage="Informe um valor válido para o campo 'Descanso'!!"
+						validatorMessage="Informe um valor entre 1 e 600 para o campo 'Descanso'!!">
+						<f:validateLongRange minimum="1" maximum="600" />
+					</p:inputText>
+					
+					<p:outputLabel for="diaTreino" value="Dia do Treino" />
+					<p:inputText id="diaTreino" maxlength="1" size="2"
+						value="#{treinoBean.treino.diaTreino}" required="true"
+						requiredMessage="O campo 'Dia do Treino' é obrigatório!!"
+						converterMessage="Informe um valor válido para o campo 'Dia do Treino'!!"
+						validatorMessage="Informe um valor entre 1 e 7 para o campo 'Dia do Treino'!!">
+						<f:validateLongRange minimum="1" maximum="7" />
+					</p:inputText>
+					</h:panelGrid>
+				</p:fieldset>
+				
+			</h:panelGrid>
+			
+			<h:panelGrid columns="2" styleClass="botoesCentralizar">
+				<p:commandButton value="Salvar" actionListener="#{treinoBean.salvar}"
+					update=":mensagem :formCadastro:painel :formListagem:tabela" 
+					icon="ui-icon-disk" title="Salva/Atualiza o treino"/>
+				<p:commandButton value="Fechar" oncomplete="PF('dialogo').hide();" 
+					icon="ui-icon-close" title="Fecha a tela"/>
+			</h:panelGrid>
+		</h:form>
+	</p:dialog>
+</ui:define>
+</ui:composition>
